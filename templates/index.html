@@ -586,6 +586,23 @@
                         </small>
                     </div>
                     
+                    <div class="form-group">
+                        <label for="generatePreheader" style="display: flex; align-items: center; cursor: pointer;">
+                            <input 
+                                type="checkbox" 
+                                id="generatePreheader" 
+                                name="generatePreheader" 
+                                value="yes"
+                                checked
+                                style="margin-right: 10px; width: 16px; height: 16px;"
+                            >
+                            📝 Generate Preheader Text
+                        </label>
+                        <small style="color: #cccccc; display: block; margin-top: 5px;">
+                            Uncheck to exclude preheader text from this campaign
+                        </small>
+                    </div>
+                    
                     <div id="uploadSection" style="display: none;">
                         <div class="form-group">
                             <label>Upload Image:</label>
@@ -951,6 +968,10 @@
                     if (ctaLink) {
                         formData.append('ctaLink', ctaLink);
                     }
+                    
+                    // Add preheader option
+                    const generatePreheader = document.getElementById('generatePreheader').checked;
+                    formData.append('generatePreheader', generatePreheader ? 'yes' : 'no');
                     
                     if (selectedImageOption === 'upload' && uploadedImageData) {
                         formData.append('uploadedImage', uploadedImageData);

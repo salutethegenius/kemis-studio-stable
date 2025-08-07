@@ -48,6 +48,7 @@ class TemplateGenerator:
         - Focus on the specific business/promotion mentioned
         - Has a clear call-to-action
         - No long paragraphs or run-on sentences
+        - Use "Bey!" instead of "Hey" in greetings for authentic Bahamian tone
         
         Return the content in JSON format with these fields:
         {
@@ -242,7 +243,7 @@ class TemplateGenerator:
         return {
             "subject_line": f"Special Offer: {prompt}",
             "hero_title": "SPECIAL OFFER",
-            "greeting": "Hey [Name,fallback=there]! 🎉",
+            "greeting": "Hey Bey [Name,fallback=there]! 🎉",
             "main_content": f"Check out this amazing deal! {prompt}",
             "cta_text": "LEARN MORE",
             "cta_url": "https://www.kemis.net",
@@ -470,6 +471,14 @@ class TemplateGenerator:
         elif "flash" in content['hero_title'].lower():
             hero_color = "#FFD700"  # Yellow for flash deals
         
+        # Generate preheader text (different from subject line)
+        preheader_text = content.get('preheader', '')
+        if not preheader_text:
+            # Create a preheader based on the main content, not subject
+            preheader_text = content.get('main_content', '')[:100]  # First 100 chars of main content
+            if len(preheader_text) > 100:
+                preheader_text = preheader_text[:97] + "..."
+        
         html_template = f"""<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html dir="ltr" lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1" name="viewport"><meta name="x-apple-disable-message-reformatting"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta content="telephone=no" name="format-detection">
@@ -484,7 +493,7 @@ class TemplateGenerator:
 	</style>
 </head>
 <body class="body" style="width:100%;height:100%;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;padding:0;Margin:0">
-<p><span style="display:none !important;color:#ffffff;height:0;mso-hide:all;line-height:0;visibility:hidden;opacity:0;font-size:0px;width:0">{content['subject_line']}</span></p>
+<p><span style="display:none !important;color:#ffffff;height:0;mso-hide:all;line-height:0;visibility:hidden;opacity:0;font-size:0px;width:0">{preheader_text}</span></p>
 <!--[if gte mso 9]><v:background xmlns:v="urn:schemas-microsoft-com:vml" fill="t"> <v:fill type="tile" color="#fafafa"></v:fill> </v:background><![endif]-->
 
 <table cellpadding="0" cellspacing="0" class="es-wrapper" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;padding:0;Margin:0;width:100%;height:100%;background-repeat:repeat;background-position:center top;background-color:#FAFAFA" width="100%">
@@ -837,6 +846,7 @@ def generate_template():
         prompt = request.form.get('prompt', '')
         image_option = request.form.get('imageOption', 'ai')
         custom_cta_link = request.form.get('ctaLink', '')
+        generate_preheader = request.form.get('generatePreheader', 'yes') == 'yes'
         
         if not prompt:
             return jsonify({'error': 'Prompt is required'}), 400
@@ -848,6 +858,13 @@ def generate_template():
         if custom_cta_link:
             content['cta_url'] = custom_cta_link
             print(f"🔗 Using custom CTA link: {custom_cta_link}")
+        
+        # Handle preheader generation
+        if not generate_preheader:
+            content['preheader'] = ''  # Empty preheader
+            print(f"📝 Preheader disabled for this campaign")
+        else:
+            print(f"📝 Preheader enabled for this campaign")
         
         # Handle image based on option
         image_data = None
