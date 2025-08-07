@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kemis Template Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+            background: #2c3e50;
+            color: white;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #e74c3c 0%, #f39c12 25%, #f1c40f 50%, #27ae60 75%, #3498db 100%);
+        }
+        
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.8;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .input-section {
+            background: #2c2c2c;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            border: 1px solid #404040;
+        }
+        
+        .input-section h2 {
+            color: #ffffff;
+            margin-bottom: 20px;
+            font-size: 22px;
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 15px;
+            border: 2px solid #404040;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 16px;
+            resize: vertical;
+            transition: border-color 0.3s;
+            background: #1a1a1a;
+            color: #ffffff;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .image-options {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #404040;
+        }
+        
+        .image-option {
+            margin-bottom: 15px;
+        }
+        
+        .image-option input[type="radio"] {
+            margin-right: 10px;
+        }
+        
+        .image-option label {
+            display: inline;
+            font-weight: normal;
+            cursor: pointer;
+            color: #ffffff;
+        }
+        
+        .file-upload {
+            display: none;
+        }
+        
+        .file-upload-label {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #00CED1;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .file-upload-label:hover {
+            background: #00B8B8;
+        }
+        
+        .uploaded-image {
+            max-width: 200px;
+            max-height: 150px;
+            margin-top: 10px;
+            border-radius: 6px;
+            display: none;
+        }
+        
+        /* Image Resizer Styles */
+        .resizer-controls {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border: 1px solid #404040;
+        }
+        
+        .resizer-controls label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+        
+        .resizer-controls input[type="range"] {
+            width: 100%;
+            margin-bottom: 15px;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .resizer-controls input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #00CED1;
+            cursor: pointer;
+        }
+        
+        .resizer-controls input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #00CED1;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .resizer-info {
+            background: #2c2c2c;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border-left: 4px solid #3498db;
+        }
+        
+        .resizer-info p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #cccccc;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        
+        .generate-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+        
+        .generate-btn:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+        
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .preview-section {
+            background: #2c2c2c;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            border: 1px solid #404040;
+        }
+        
+        .preview-section h2 {
+            color: #ffffff;
+            margin-bottom: 20px;
+            font-size: 22px;
+            font-weight: 600;
+        }
+        
+        .preview-container {
+            border: 2px dashed #404040;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1a1a1a;
+        }
+        
+        .preview-content {
+            text-align: center;
+            color: #cccccc;
+        }
+        
+        .status-step {
+            display: none;
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        .status-step.active {
+            display: block;
+        }
+        
+        .status-step.completed {
+            color: #27ae60;
+        }
+        
+        .status-step.processing {
+            color: #3498db;
+        }
+        
+        .status-step h3 {
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+        
+        .status-step p {
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        
+        .spinner-small {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #404040;
+            border-radius: 50%;
+            border-top-color: #3498db;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #00CED1;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .result-section {
+            display: none;
+            background: #2c2c2c;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            border: 1px solid #404040;
+            margin-top: 40px;
+        }
+        
+        .result-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #404040;
+        }
+        
+        .tab {
+            padding: 15px 30px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab {
+            padding: 15px 30px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            color: #cccccc;
+        }
+        
+        .tab.active {
+            border-bottom-color: #3498db;
+            color: #3498db;
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .email-preview {
+            border: 1px solid #404040;
+            border-radius: 8px;
+            overflow: hidden;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .email-preview iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+        }
+        
+        .content-preview {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #404040;
+        }
+        
+        .content-preview h3 {
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+        
+        .content-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #2c2c2c;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .content-item strong {
+            color: #ffffff;
+        }
+        
+        .content-item p {
+            color: #cccccc;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .btn-primary {
+            background-color: #00CED1;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: #FF6B35;
+            color: white;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .header h1 {
+                font-size: 32px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📧 KemisEmail Campaign Creator</h1>
+            <p>Generate professional email campaigns for Sendy with AI-powered content and images</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="input-section">
+                <h2>📝 Campaign Details</h2>
+                <form id="templateForm">
+                    <div class="form-group">
+                        <label for="prompt">What's your email campaign about?</label>
+                        <textarea 
+                            id="prompt" 
+                            name="prompt" 
+                            placeholder="Example: BBUC is having a school sale on Friday"
+                            required
+                            style="color: #ffffff;"
+                        ></textarea>
+                    </div>
+                    
+                    <div class="image-options">
+                        <h3>🖼️ Image Options</h3>
+                        <div class="image-option">
+                            <input type="radio" id="ai-generate" name="imageOption" value="ai" checked>
+                            <label for="ai-generate">🤖 Let AI generate an image</label>
+                        </div>
+                        <div class="image-option">
+                            <input type="radio" id="upload-image" name="imageOption" value="upload">
+                            <label for="upload-image">📤 Upload my own image</label>
+                        </div>
+                        <div class="image-option">
+                            <input type="radio" id="no-image" name="imageOption" value="none">
+                            <label for="no-image">🚫 No image (text only)</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ctaLink">🔗 CTA Button Link (Optional)</label>
+                        <input 
+                            type="url" 
+                            id="ctaLink" 
+                            name="ctaLink" 
+                            placeholder="https://www.kemis.net/sale"
+                            style="width: 100%; padding: 12px; border: 2px solid #404040; border-radius: 6px; font-size: 14px; background: #1a1a1a; color: #ffffff;"
+                        >
+                        <small style="color: #cccccc; display: block; margin-top: 5px;">
+                            Leave empty to let AI generate a link, or enter your custom URL
+                        </small>
+                    </div>
+                    
+                    <div id="uploadSection" style="display: none;">
+                        <div class="form-group">
+                            <label>Upload Image:</label>
+                            <input type="file" id="imageUpload" class="file-upload" accept="image/*">
+                            <label for="imageUpload" class="file-upload-label">Choose Image</label>
+                            <img id="uploadedImage" class="uploaded-image" alt="Uploaded image">
+                        </div>
+                        
+                        <!-- Image Resizer Module -->
+                        <div id="resizerSection" style="display: none;">
+                            <div class="form-group">
+                                <h4>🔧 Image Resizer</h4>
+                                <p><small>Resize your image to prevent large file sizes</small></p>
+                                
+                                <div class="resizer-controls">
+                                    <label>Target Width: <span id="targetWidth">560</span>px</label>
+                                    <input type="range" id="widthSlider" min="200" max="800" value="560" step="10">
+                                    
+                                    <label>Quality: <span id="qualityValue">70</span>%</label>
+                                    <input type="range" id="qualitySlider" min="20" max="90" value="70" step="5">
+                                    
+                                    <div class="resizer-info">
+                                        <p><strong>Original:</strong> <span id="originalSize">-</span></p>
+                                        <p><strong>Resized:</strong> <span id="resizedSize">-</span></p>
+                                        <p><strong>Dimensions:</strong> <span id="imageDimensions">-</span></p>
+                                    </div>
+                                    
+                                    <button type="button" id="resizeBtn" class="btn btn-secondary">🔄 Resize Image</button>
+                                    <button type="button" id="resetBtn" class="btn btn-warning">🔄 Reset</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="generate-btn" id="generateBtn">
+                        🚀 Generate Template
+                    </button>
+                </form>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Generating your template...</p>
+                    <p><small>This may take a few moments</small></p>
+                </div>
+            </div>
+            
+            <div class="preview-section">
+                <h2>🚀 Campaign Builder</h2>
+                <div class="preview-container" id="previewContainer">
+                    <div class="preview-content" id="statusContent">
+                        <h3>Ready to Create Magic! ✨</h3>
+                        <p>Describe your campaign and watch the AI build your professional email template.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="result-section" id="resultSection">
+            <div class="result-tabs">
+                <div class="tab active" data-tab="preview">📧 Email Preview</div>
+                <div class="tab" data-tab="content">📄 Content Details</div>
+                <div class="tab" data-tab="image">🖼️ Image Prompt</div>
+            </div>
+            
+            <div class="tab-content active" id="previewTab">
+                <div class="email-preview" id="emailPreview">
+                    <!-- Email preview will be inserted here -->
+                </div>
+            </div>
+            
+            <div class="tab-content" id="contentTab">
+                <div class="content-preview" id="contentPreview">
+                    <!-- Content details will be inserted here -->
+                </div>
+            </div>
+            
+            <div class="tab-content" id="imageTab">
+                <div class="content-preview" id="imagePromptPreview">
+                    <!-- Image prompt will be inserted here -->
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="downloadBtn">📥 Download HTML</button>
+                <button class="btn btn-secondary" id="editBtn">✏️ Edit Template</button>
+                <button class="btn btn-success" id="sendyBtn">📤 Create Campaign in Sendy</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('templateForm');
+            const generateBtn = document.getElementById('generateBtn');
+            const loading = document.getElementById('loading');
+            const resultSection = document.getElementById('resultSection');
+            const previewContainer = document.getElementById('previewContainer');
+            const uploadSection = document.getElementById('uploadSection');
+            const imageUpload = document.getElementById('imageUpload');
+            const uploadedImage = document.getElementById('uploadedImage');
+            
+            let currentResult = null;
+            let uploadedImageData = null;
+            
+            // Image option handling
+            const imageOptions = document.querySelectorAll('input[name="imageOption"]');
+            imageOptions.forEach(option => {
+                option.addEventListener('change', function() {
+                    if (this.value === 'upload') {
+                        uploadSection.style.display = 'block';
+                    } else {
+                        uploadSection.style.display = 'none';
+                        uploadedImageData = null;
+                        uploadedImage.style.display = 'none';
+                    }
+                });
+            });
+            
+            // File upload handling
+            imageUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        uploadedImageData = e.target.result;
+                        uploadedImage.src = uploadedImageData;
+                        uploadedImage.style.display = 'block';
+                        
+                        // Show resizer section and initialize
+                        document.getElementById('resizerSection').style.display = 'block';
+                        initializeResizer(file, e.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Image Resizer functionality
+            let originalImageData = null;
+            let originalFile = null;
+            
+            function initializeResizer(file, imageData) {
+                originalFile = file;
+                originalImageData = imageData;
+                
+                // Display original file info
+                document.getElementById('originalSize').textContent = formatBytes(file.size);
+                
+                // Create image to get dimensions
+                const img = new Image();
+                img.onload = function() {
+                    document.getElementById('imageDimensions').textContent = `${img.width} × ${img.height}px`;
+                    document.getElementById('resizedSize').textContent = formatBytes(file.size);
+                };
+                img.src = imageData;
+                
+                // Update sliders
+                updateSliderValues();
+            }
+            
+            function updateSliderValues() {
+                const widthSlider = document.getElementById('widthSlider');
+                const qualitySlider = document.getElementById('qualitySlider');
+                
+                document.getElementById('targetWidth').textContent = widthSlider.value;
+                document.getElementById('qualityValue').textContent = qualitySlider.value;
+                
+                // Update resized size in real-time
+                if (originalImageData) {
+                    const width = parseInt(widthSlider.value);
+                    const quality = parseInt(qualitySlider.value);
+                    updateResizedSize(originalImageData, width, quality);
+                }
+            }
+            
+            function updateResizedSize(imageData, targetWidth, quality) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Calculate new height maintaining aspect ratio
+                    const ratio = targetWidth / img.width;
+                    const newHeight = Math.round(img.height * ratio);
+                    
+                    canvas.width = targetWidth;
+                    canvas.height = newHeight;
+                    
+                    // Draw resized image
+                    ctx.drawImage(img, 0, 0, targetWidth, newHeight);
+                    
+                    // Convert to blob with specified quality
+                    canvas.toBlob(function(blob) {
+                        document.getElementById('resizedSize').textContent = formatBytes(blob.size);
+                        document.getElementById('imageDimensions').textContent = `${targetWidth} × ${newHeight}px`;
+                    }, 'image/jpeg', quality / 100);
+                };
+                img.src = imageData;
+            }
+            
+            function formatBytes(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            // Slider event listeners with debounce
+            let resizeTimeout;
+            function debouncedUpdateSliderValues() {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(updateSliderValues, 100); // 100ms delay
+            }
+            
+            document.getElementById('widthSlider').addEventListener('input', debouncedUpdateSliderValues);
+            document.getElementById('qualitySlider').addEventListener('input', debouncedUpdateSliderValues);
+            
+            // Resize button
+            document.getElementById('resizeBtn').addEventListener('click', function() {
+                if (!originalImageData) return;
+                
+                const width = parseInt(document.getElementById('widthSlider').value);
+                const quality = parseInt(document.getElementById('qualitySlider').value);
+                
+                resizeImage(originalImageData, width, quality);
+            });
+            
+            // Reset button
+            document.getElementById('resetBtn').addEventListener('click', function() {
+                if (!originalFile || !originalImageData) return;
+                
+                uploadedImageData = originalImageData;
+                uploadedImage.src = originalImageData;
+                document.getElementById('resizedSize').textContent = formatBytes(originalFile.size);
+                
+                // Reset sliders
+                document.getElementById('widthSlider').value = 560;
+                document.getElementById('qualitySlider').value = 70;
+                updateSliderValues();
+            });
+            
+            function resizeImage(imageData, targetWidth, quality) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Calculate new height maintaining aspect ratio
+                    const ratio = targetWidth / img.width;
+                    const newHeight = Math.round(img.height * ratio);
+                    
+                    canvas.width = targetWidth;
+                    canvas.height = newHeight;
+                    
+                    // Draw resized image
+                    ctx.drawImage(img, 0, 0, targetWidth, newHeight);
+                    
+                    // Convert to blob with specified quality
+                    canvas.toBlob(function(blob) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            uploadedImageData = e.target.result;
+                            uploadedImage.src = uploadedImageData;
+                            
+                            // Update info
+                            document.getElementById('resizedSize').textContent = formatBytes(blob.size);
+                            document.getElementById('imageDimensions').textContent = `${targetWidth} × ${newHeight}px`;
+                            
+                            console.log(`✅ Image resized: ${formatBytes(blob.size)} (${targetWidth}×${newHeight}px, ${quality}% quality)`);
+                        };
+                        reader.readAsDataURL(blob);
+                    }, 'image/jpeg', quality / 100);
+                };
+                img.src = imageData;
+            }
+            
+            function startStatusLoader() {
+                const statusContent = document.getElementById('statusContent');
+                const steps = [
+                    { title: 'Building your campaign...', message: 'Initializing campaign structure', delay: 500 },
+                    { title: 'Crafting your subject line...', message: 'Creating engaging email subject', delay: 1500 },
+                    { title: 'Working on engaging content...', message: 'Generating compelling copy', delay: 2500 },
+                    { title: 'Adding your image and link...', message: 'Processing visuals and CTAs', delay: 3500 },
+                    { title: 'Adding final touches...', message: 'Polishing your template', delay: 4500 },
+                    { title: 'All done! ✨', message: 'Scroll below to find your new campaign', delay: 5500 }
+                ];
+                
+                let currentStep = 0;
+                
+                function showStep(stepIndex) {
+                    if (stepIndex >= steps.length) return;
+                    
+                    const step = steps[stepIndex];
+                    const isLastStep = stepIndex === steps.length - 1;
+                    const isProcessing = !isLastStep;
+                    
+                    statusContent.innerHTML = `
+                        <div class="status-step ${isProcessing ? 'processing' : 'completed'} active">
+                            <h3>${isProcessing ? '<span class="spinner-small"></span>' : ''}${step.title}</h3>
+                            <p>${step.message}</p>
+                        </div>
+                    `;
+                    
+                    if (isProcessing && stepIndex < steps.length - 1) {
+                        setTimeout(() => showStep(stepIndex + 1), step.delay);
+                    }
+                }
+                
+                showStep(0);
+            }
+            
+            // Tab functionality
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetTab = tab.getAttribute('data-tab');
+                    
+                    // Remove active class from all tabs and contents
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(tc => tc.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    tab.classList.add('active');
+                    document.getElementById(targetTab + 'Tab').classList.add('active');
+                });
+            });
+            
+            // Form submission
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const prompt = document.getElementById('prompt').value.trim();
+                if (!prompt) {
+                    showError('Please enter a campaign description');
+                    return;
+                }
+                
+                const selectedImageOption = document.querySelector('input[name="imageOption"]:checked').value;
+                
+                // Validate upload if selected
+                if (selectedImageOption === 'upload' && !uploadedImageData) {
+                    showError('Please upload an image or select a different option');
+                    return;
+                }
+                
+                // Show loading state
+                generateBtn.disabled = true;
+                loading.style.display = 'block';
+                resultSection.style.display = 'none';
+                
+                // Start status loader
+                startStatusLoader();
+                
+                try {
+                    const formData = new FormData();
+                    formData.append('prompt', prompt);
+                    formData.append('imageOption', selectedImageOption);
+                    
+                    // Add CTA link if provided
+                    const ctaLink = document.getElementById('ctaLink').value.trim();
+                    if (ctaLink) {
+                        formData.append('ctaLink', ctaLink);
+                    }
+                    
+                    if (selectedImageOption === 'upload' && uploadedImageData) {
+                        formData.append('uploadedImage', uploadedImageData);
+                    }
+                    
+                    const response = await fetch('/generate', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        currentResult = result;
+                        displayResult(result);
+                        showSuccess('Template generated successfully!');
+                    } else {
+                        showError(result.error || 'Failed to generate template');
+                    }
+                } catch (error) {
+                    showError('Network error: ' + error.message);
+                } finally {
+                    generateBtn.disabled = false;
+                    loading.style.display = 'none';
+                }
+            });
+            
+            function displayResult(result) {
+                // Display email preview
+                const emailPreview = document.getElementById('emailPreview');
+                
+                // Create a blob URL for the HTML content to properly render it
+                const blob = new Blob([result.html_template], { type: 'text/html' });
+                const blobUrl = URL.createObjectURL(blob);
+                emailPreview.innerHTML = `<iframe src="${blobUrl}"></iframe>`;
+                
+                // Clean up the blob URL when the iframe loads
+                const iframe = emailPreview.querySelector('iframe');
+                iframe.onload = function() {
+                    URL.revokeObjectURL(blobUrl);
+                };
+                
+                // Display content details
+                const contentPreview = document.getElementById('contentPreview');
+                contentPreview.innerHTML = `
+                    <h3>Generated Content</h3>
+                    <div class="content-item">
+                        <strong>Subject Line:</strong> ${result.content.subject_line}
+                    </div>
+                    <div class="content-item">
+                        <strong>Hero Title:</strong> ${result.content.hero_title}
+                    </div>
+                    <div class="content-item">
+                        <strong>Greeting:</strong> ${result.content.greeting}
+                    </div>
+                    <div class="content-item">
+                        <strong>Main Content:</strong> ${result.content.main_content}
+                    </div>
+                    <div class="content-item">
+                        <strong>CTA Text:</strong> ${result.content.cta_text}
+                    </div>
+                    <div class="content-item">
+                        <strong>CTA URL:</strong> ${result.content.cta_url}
+                    </div>
+                `;
+                
+                // Display image prompt
+                const imagePromptPreview = document.getElementById('imagePromptPreview');
+                imagePromptPreview.innerHTML = `
+                    <h3>Image Information</h3>
+                    <div class="content-item">
+                        <strong>Image Source:</strong> ${result.image_source || 'AI Generated'}
+                    </div>
+                    ${result.image_prompt ? `<div class="content-item"><strong>Image Prompt:</strong> ${result.image_prompt}</div>` : ''}
+                    ${result.image_data ? '<div class="content-item"><strong>Image Generated:</strong> Yes</div>' : '<div class="content-item"><strong>Image Generated:</strong> No (using placeholder)</div>'}
+                `;
+                
+                // Show result section
+                resultSection.style.display = 'block';
+                
+                // Update preview container
+                previewContainer.innerHTML = `
+                    <div class="preview-content">
+                        <h3>✅ Template Generated!</h3>
+                        <p>Your email template has been created successfully. Check the tabs below to preview and download.</p>
+                    </div>
+                `;
+            }
+            
+            // Download functionality
+            document.getElementById('downloadBtn').addEventListener('click', function() {
+                if (currentResult) {
+                    const link = document.createElement('a');
+                    link.href = `/download/${currentResult.filename}`;
+                    link.download = currentResult.filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            });
+            
+            // Edit functionality
+            document.getElementById('editBtn').addEventListener('click', function() {
+                if (currentResult) {
+                    // For now, just show the content in an editable format
+                    const newPrompt = prompt('Edit your campaign description:', document.getElementById('prompt').value);
+                    if (newPrompt) {
+                        document.getElementById('prompt').value = newPrompt;
+                        form.dispatchEvent(new Event('submit'));
+                    }
+                }
+            });
+            
+            // Sendy functionality
+            document.getElementById('sendyBtn').addEventListener('click', async function() {
+                if (!currentResult) {
+                    showError('No template available to send to Sendy');
+                    return;
+                }
+                
+                // Show loading state
+                const sendyBtn = document.getElementById('sendyBtn');
+                const originalText = sendyBtn.textContent;
+                sendyBtn.textContent = '📤 Sending to Sendy...';
+                sendyBtn.disabled = true;
+                
+                try {
+                    console.log('📤 Sending to Sendy:', {
+                        content: currentResult.content,
+                        filename: currentResult.filename,
+                        templateSize: currentResult.html_template.length
+                    });
+                    
+                    const response = await fetch('/send-to-sendy', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            content: currentResult.content,
+                            html_template: currentResult.html_template,
+                            filename: currentResult.filename
+                        })
+                    });
+                    
+                    console.log('📡 Sendy response status:', response.status);
+                    const result = await response.json();
+                    console.log('📡 Sendy response:', result);
+                    
+                    if (result.success) {
+                        showSuccess(`✅ ${result.message} (Campaign ID: ${result.campaign_id})`);
+                    } else {
+                        showError(`❌ Sendy Error: ${result.error}`);
+                    }
+                } catch (error) {
+                    showError(`❌ Network Error: ${error.message}`);
+                } finally {
+                    sendyBtn.textContent = originalText;
+                    sendyBtn.disabled = false;
+                }
+            });
+            
+            function showError(message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error';
+                errorDiv.textContent = message;
+                form.insertBefore(errorDiv, form.firstChild);
+                
+                setTimeout(() => {
+                    errorDiv.remove();
+                }, 5000);
+            }
+            
+            function showSuccess(message) {
+                const successDiv = document.createElement('div');
+                successDiv.className = 'success';
+                successDiv.textContent = message;
+                form.insertBefore(successDiv, form.firstChild);
+                
+                setTimeout(() => {
+                    successDiv.remove();
+                }, 5000);
+            }
+        });
+    </script>
+</body>
+</html> 
