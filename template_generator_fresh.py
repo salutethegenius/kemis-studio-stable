@@ -479,22 +479,28 @@ class TemplateGenerator:
             if len(preheader_text) > 100:
                 preheader_text = preheader_text[:97] + "..."
         
-        html_template = f"""<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+        # Build HTML template using string concatenation to avoid CSS brace conflicts
+        html_parts = []
+        
+        # HTML head and styles
+        html_parts.append("""<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html dir="ltr" lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1" name="viewport"><meta name="x-apple-disable-message-reformatting"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta content="telephone=no" name="format-detection">
-	<title>{content['subject_line']}</title>
+	<title>""" + content['subject_line'] + """</title>
 	<!--[if (mso 16)]><style type="text/css">     a {{text-decoration: none;}}     </style><![endif]--><!--[if gte mso 9]><style>sup {{ font-size: 100% !important; }}</style><![endif]--><!--[if gte mso 9]><noscript> <xml> <o:OfficeDocumentSettings> <o:AllowPNG></o:AllowPNG> <o:PixelsPerInch>96</o:PixelsPerInch> </o:OfficeDocumentSettings> </xml>
 <![endif]--><!--[if mso]><xml> <w:WordDocument xmlns:w="urn:schemas-microsoft-com:office:word"> <w:DontUseAdvancedTypographyReadingMail/> </w:WordDocument> </xml>
 <![endif]-->
 	<style type="text/css">.rollover:hover .rollover-first {{ max-height:0px!important; display:none!important; }} .rollover:hover .rollover-second {{ max-height:none!important; display:block!important; }} .rollover span {{ font-size:0px; }} u + .body img ~ div div {{ display:none; }} #outlook a {{ padding:0; }} span.MsoHyperlink, span.MsoHyperlinkFollowed {{ color:inherit; mso-style-priority:99; }} a.ba {{ mso-style-priority:100!important; text-decoration:none!important; }} a[x-apple-data-detectors], #MessageViewBody a {{ color:inherit!important; text-decoration:none!important; font-size:inherit!important; font-family:inherit!important; font-weight:inherit!important; line-height:inherit!important; }} .q {{ display:none; float:left; overflow:hidden; width:0; max-height:0; line-height:0; mso-hide:all; }} @media only screen and (max-width:600px) {{.bw {{ padding-top:10px!important }} .bv {{ padding-bottom:10px!important }}
- .bu {{ padding-right:20px!important }} .bt {{ padding-left:20px!important }} .bs {{ padding-right:5px!important }} .br {{ padding-left:5px!important }} .bq {{ padding-left:0px!important }} .bp {{ padding-right:24px!important }} *[class="gmail-fix"] {{ display:none!important }} p, a {{ line-height:150%!important }} h1, h1 a {{ line-height:110%!important }} h2, h2 a {{ line-height:110%!important }} h3, h3 a {{ line-height:110%!important }} h4, h4 a {{ line-height:110%!important }} h5, h5 a {{ line-height:110%!important }} h6, h6 a {{ line-height:110%!important }} .bm p {{ }} .bl p {{ }} .bk p {{ }} h1 {{ font-size:36px!important; text-align:left }} h2 {{ font-size:26px!important; text-align:left }} h3 {{ font-size:20px!important; text-align:left }} h4 {{ font-size:24px!important; text-align:left }} h5 {{ font-size:20px!important; text-align:left }} h6 {{ font-size:16px!important; text-align:left }} .o td a {{ font-size:12px!important }} .bm p, .bm a {{ font-size:14px!important }}
+ .bu {{ padding-right:20px!important }} .bt {{ padding-left:20px!important }} .bs {{ padding-right:5px!important }} .br {{ padding-left:5px!important }} .bq {{ padding-left:0px!important }} .bp {{ padding-right:24px!important }} *[class="gmail-fix"] {{ display:none!important }} p, a {{ line-height:150%!important }} h1, h1 a {{ line-height:110%!important }} h2, h2 a {{ line-height:110%!important }} h3, h3 a {{ line-height:110%!important }} h4, h4 a {{ line-height:110%!important }} h5, h5 a {{ line-height:110%!important }} h6, h6 a {{ line-height:110%!important }} .o td a {{ font-size:12px!important }} .bm p, .bm a {{ font-size:14px!important }}
  .bl p, .bl a {{ font-size:14px!important }} .bk p, .bk a {{ font-size:12px!important }} .bh, .bh h1, .bh h2, .bh h3, .bh h4, .bh h5, .bh h6 {{ text-align:center!important }} .bg .rollover:hover .rollover-second, .bh .rollover:hover .rollover-second, .bi .rollover:hover .rollover-second {{ display:inline!important }} a.ba, button.ba {{ font-size:20px!important; padding:10px 20px 10px 20px!important; line-height:120%!important }} a.ba, button.ba, .be {{ display:inline-block!important }} .z, .z .ba, .bb, .bb td, .o {{ display:inline-block!important }} .t table, .u table, .v table, .t, .v, .u {{ width:100%!important; max-width:600px!important }} .adapt-img {{ width:100%!important; height:auto!important }} .q {{ width:auto!important; overflow:visible!important; float:none!important; max-height:inherit!important; line-height:inherit!important }} tr.q {{ display:table-row!important }} .o td {{ width:1%!important }}
  table.n, .esd-block-html table {{ width:auto!important }} .h-auto {{ height:auto!important }} .l .m.e, .l .m.e * {{ font-size:13px!important; line-height:150%!important }} .k .d.e, .k .d.e * {{ font-size:16px!important; line-height:150%!important }} .j .i, .j .i * {{ font-size:48px!important; line-height:110%!important }} .h .i, .j .i * {{ font-size:48px!important; line-height:110%!important }} .f .g.e, .f .g.e * {{ font-size:22px!important; line-height:150%!important }} .c .d.e, .c .d.e * {{ font-size:16px!important; line-height:150%!important }} .a .b, .a .b * {{ font-size:14px!important; line-height:150%!important }} }} @media screen and (max-width:384px) {{.mail-message-content {{ width:414px!important }} }}
 	</style>
 </head>
 <body class="body" style="width:100%;height:100%;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;padding:0;Margin:0">
-<p><span style="display:none !important;color:#ffffff;height:0;mso-hide:all;line-height:0;visibility:hidden;opacity:0;font-size:0px;width:0">{preheader_text}</span></p>
-<!--[if gte mso 9]><v:background xmlns:v="urn:schemas-microsoft-com:vml" fill="t"> <v:fill type="tile" color="#fafafa"></v:fill> </v:background><![endif]-->
+<p><span style="display:none !important;color:#ffffff;height:0;mso-hide:all;line-height:0;visibility:hidden;opacity:0;font-size:0px;width:0">""" + preheader_text + """</span></p>""")
+        
+        # Main email structure
+        html_parts.append("""<!--[if gte mso 9]><v:background xmlns:v="urn:schemas-microsoft-com:vml" fill="t"> <v:fill type="tile" color="#fafafa"></v:fill> </v:background><![endif]-->
 
 <table cellpadding="0" cellspacing="0" class="es-wrapper" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;padding:0;Margin:0;width:100%;height:100%;background-repeat:repeat;background-position:center top;background-color:#FAFAFA" width="100%">
 	<tbody>
@@ -603,188 +609,18 @@ class TemplateGenerator:
 									</td>
 								</tr>
 							</tbody>
-						</table>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-
-			<!-- MAIN CONTENT SECTION -->
+						</table>""")
+        
+        # Hero section
+        html_parts.append("""<!-- HERO SECTION -->
 			<table align="center" cellpadding="0" cellspacing="0" class="t" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;width:100%;table-layout:fixed !important">
 				<tbody>
 					<tr>
 						<td align="center" style="padding:0;Margin:0">
-						<table align="center" bgcolor="#ffffff" cellpadding="0" cellspacing="0" class="bm" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;background-color:#FFFFFF;width:600px">
+						<table align="center" bgcolor="#ffffff" cellpadding="0" cellspacing="0" class="bm" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;background-color:#ffffff;width:600px">
 							<tbody>
 								<tr>
-									<td align="left" style="Margin:0;padding-top:20px;padding-right:20px;padding-bottom:10px;padding-left:20px">
-									<table cellpadding="0" cellspacing="0" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
-										<tbody>
-											<tr>
-												<td align="center" style="padding:0;Margin:0;width:560px" valign="top">
-												<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
-													<tbody>
-														<tr>
-															<td align="center" style="padding:0;Margin:0;font-size:0px">
-																{self._get_image_html(image_data, content['subject_line'], content['cta_url'])}
-															</td>
-														</tr>
-														<tr class="r">
-															<td align="center" class="j" style="Margin:0;padding-top:15px;padding-right:35px;padding-bottom:15px;padding-left:35px">
-															<h1 class="bh i e" style="Margin:0;font-family:arial, 'helvetica neue', helvetica, sans-serif;mso-line-height-rule:exactly;letter-spacing:0;font-size:72px;font-style:normal;font-weight:bold;line-height:64.8px;color:{hero_color}">{content['hero_title']}</h1>
-															</td>
-														</tr>
-														<tr>
-															<td align="left" class="c bt bu" style="Margin:0;padding-top:3px;padding-bottom:3px;padding-right:30px;padding-left:30px">
-															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:27px;letter-spacing:0;color:#333333;font-size:18px;text-align:center">{content['greeting']}</p>
-
-															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:27px;letter-spacing:0;color:#333333;font-size:18px;text-align:center">&nbsp;</p>
-
-															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:27px;letter-spacing:0;color:#333333;font-size:18px;text-align:center">{content['main_content']}</p>
-															</td>
-														</tr>
-													</tbody>
-												</table>
-												</td>
-											</tr>
-										</tbody>
-									</table>
-									</td>
-								</tr>
-								<tr>
-									<td align="left" style="Margin:0;padding-right:20px;padding-bottom:10px;padding-left:20px;padding-top:10px">
-									<table cellpadding="0" cellspacing="0" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
-										<tbody>
-											<tr>
-												<td align="center" style="padding:0;Margin:0;width:560px" valign="top">
-												<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:separate;border-spacing:0px;border-left:2px dashed #cccccc;border-right:2px dashed #cccccc;border-top:2px dashed #cccccc;border-bottom:2px dashed #cccccc;border-radius:5px" width="100%">
-													<tbody>
-														<tr>
-															<td align="center" class="k" style="padding:0;Margin:0;padding-top:20px;padding-right:20px;padding-left:20px">
-															<h3 class="bh e d" style="Margin:0;font-family:arial, 'helvetica neue', helvetica, sans-serif;mso-line-height-rule:exactly;letter-spacing:0;font-size:18px;font-style:normal;font-weight:bold;line-height:21.6px;color:#333333">🎯 Ready to Take Action?</h3>
-															</td>
-														</tr>
-														<tr>
-															<td align="center" class="f br bs" style="Margin:0;padding-right:20px;padding-left:20px;padding-bottom:20px;padding-top:10px">
-															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:24px;letter-spacing:0;color:#333333;font-size:16px;text-align:center">{content.get('offer_details', 'Don\'t miss out on this incredible opportunity!')}</p>
-															</td>
-														</tr>
-														<tr>
-															<td align="center" style="Margin:0;padding-bottom:20px;padding-left:20px;padding-right:20px">
-															<a href="{content['cta_url']}" target="_blank" style="display:inline-block;background-color:#00CED1;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:6px;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:16px;font-weight:bold;line-height:1.2;text-align:center;margin:0;">{content['cta_text']}</a>
-															</td>
-														</tr>
-													</tbody>
-												</table>
-												</td>
-											</tr>
-										</tbody>
-									</table>
-									</td>
-								</tr>
-								<tr>
-									<td align="left" style="padding:0;Margin:0;padding-right:20px;padding-bottom:10px;padding-left:20px">&nbsp;</td>
-								</tr>
-							</tbody>
-						</table>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-
-			<table align="center" cellpadding="0" cellspacing="0" class="v" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;width:100%;table-layout:fixed !important;background-color:transparent;background-repeat:repeat;background-position:center top">
-				<tbody>
-					<tr>
-						<td align="center" style="padding:0;Margin:0">
-						<table align="center" cellpadding="0" cellspacing="0" class="bl" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;background-color:transparent;width:640px">
-							<tbody>
-								<tr>
-									<td align="left" style="padding:20px;Margin:0">
-									<table cellpadding="0" cellspacing="0" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
-										<tbody>
-											<tr>
-												<td align="left" style="padding:0;Margin:0;width:560px">
-												<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
-													<tbody>
-														<tr>
-															<td align="center" class="bq" style="padding:0;Margin:0;padding-left:30px;padding-top:15px;padding-bottom:15px;font-size:0">
-															<table cellpadding="0" cellspacing="0" class="n bb" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px">
-																<tbody>
-																	<tr>
-																		<td align="center" class="bp" style="padding:0;Margin:0;padding-right:28px" valign="top"><a href="https://www.kemis.net" style="mso-line-height-rule:exactly;text-decoration:underline;color:#333333;font-size:12px" target="_blank"><img alt="Website" height="26" src="https://frhuwic.stripocdn.email/content/assets/img/other-icons/logo-black/link-logo-black.png" style="display: block; font-size: 14px; border: 0px; outline: none; text-decoration: none; width: 26px; height: 26px;" title="Website" width="26" /></a>
-
-																		<p style="text-align: center;">&nbsp;</p>
-																		</td>
-																		<td align="center" class="bp" style="padding:0;Margin:0;padding-right:28px" valign="top"><a href="https://bs.linkedin.com/company/kemisdigital" style="mso-line-height-rule:exactly;text-decoration:underline;color:#333333;font-size:12px" target="_blank"><img alt="In" height="26" src="https://frhuwic.stripocdn.email/content/assets/img/social-icons/logo-black/linkedin-logo-black.png" style="display:block;font-size:14px;border:0;outline:none;text-decoration:none" title="LinkedIn" width="26" /></a></td>
-																		<td align="center" class="bp" style="padding:0;Margin:0;padding-right:28px" valign="top"><a href="https://www.facebook.com/kemis.net" style="mso-line-height-rule:exactly;text-decoration:underline;color:#333333;font-size:12px" target="_blank"><img alt="Fb" height="26" src="https://frhuwic.stripocdn.email/content/assets/img/social-icons/logo-black/facebook-logo-black.png" style="display:block;font-size:14px;border:0;outline:none;text-decoration:none" title="Facebook" width="26" /></a></td>
-																		<td align="center" style="padding:0;Margin:0" valign="top"><a href="https://www.youtube.com/@kemisdigital" style="mso-line-height-rule:exactly;text-decoration:underline;color:#333333;font-size:12px" target="_blank"><img alt="Yt" height="26" src="https://frhuwic.stripocdn.email/content/assets/img/social-icons/logo-black/youtube-logo-black.png" style="display:block;font-size:14px;border:0;outline:none;text-decoration:none" title="YouTube" width="26" /></a></td>
-																	</tr>
-																</tbody>
-															</table>
-															</td>
-														</tr>
-														<tr class="r">
-															<td align="center" class="a" style="padding:0;Margin:0;padding-bottom:35px">
-															<p class="b" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px"><strong>KemisEmail</strong> – Delivering Local Deals and Offers Since 2005</p>
-
-															<p class="b" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">2025 &copy; Kemis Group of Companies Inc. All rights reserved.</p>
-
-															<p class="b" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">Nassau West, New Providence, The Bahamas</p>
-															</td>
-														</tr>
-														<!--[if !mso]><!-- -->
-														<tr class="q" style="display:none;float:left;overflow:hidden;width:0;max-height:0;line-height:0;mso-hide:all">
-															<td align="center" class="l" style="padding:0;Margin:0;padding-bottom:35px">
-															<p class="e m" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;color:#333333;font-size:12px"><strong>KemisEmail</strong> – Delivering Local Deals and Offers Since 2005</p>
-
-															<p class="e m" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;color:#333333;font-size:12px">2025 &copy; Kemis Group of Companies Inc. All rights reserved.</p>
-
-															<p class="e m" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;color:#333333;font-size:12px">Nassau West, New Providence, The Bahamas</p>
-															</td>
-														</tr>
-														<!--<![endif]-->
-														<tr>
-															<td style="padding:0;Margin:0">
-															<table cellpadding="0" cellspacing="0" class="o" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
-																<tbody>
-																	<tr class="links">
-																		<td align="center" style="Margin:0;border:0;padding-bottom:5px;padding-top:5px;padding-right:5px;padding-left:5px" valign="top" width="33.33%">
-																		<div style="vertical-align:middle;display:block"><a href="https://dzvs3n3sqle.typeform.com/to/JxCYlnLb" style="mso-line-height-rule:exactly;text-decoration:none;font-family:arial, 'helvetica neue', helvetica, sans-serif;display:block;color:#999999;font-size:12px" target="_blank">Sign Up</a></div>
-																		</td>
-																		<td align="center" style="Margin:0;border:0;padding-bottom:5px;padding-top:5px;padding-right:5px;padding-left:5px;border-left:1px solid #cccccc" valign="top" width="33.33%">
-																		<div style="vertical-align:middle;display:block"><a href="https://kemisdigital.com/policies/refund-policy" style="mso-line-height-rule:exactly;text-decoration:none;font-family:arial, 'helvetica neue', helvetica, sans-serif;display:block;color:#999999;font-size:12px" target="_blank">Privacy Policy</a></div>
-																		</td>
-																		<td align="center" style="Margin:0;border:0;padding-bottom:5px;padding-top:5px;padding-right:5px;padding-left:5px;border-left:1px solid #cccccc" valign="top" width="33.33%">
-																		<div style="vertical-align:middle;display:block"><a href="https://kemisdigital.com/policies/terms-of-service" style="mso-line-height-rule:exactly;text-decoration:none;font-family:arial, 'helvetica neue', helvetica, sans-serif;display:block;color:#999999;font-size:12px" target="_blank">Terms of Use</a></div>
-																		</td>
-																	</tr>
-																</tbody>
-															</table>
-															</td>
-														</tr>
-													</tbody>
-												</table>
-												</td>
-											</tr>
-										</tbody>
-									</table>
-									</td>
-								</tr>
-							</tbody>
-						</table>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-
-			<table align="center" cellpadding="0" cellspacing="0" class="t" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;width:100%;table-layout:fixed !important">
-				<tbody>
-					<tr>
-						<td align="center" class="es-info-area" style="padding:0;Margin:0">
-						<table align="center" bgcolor="#00000000" cellpadding="0" cellspacing="0" class="bm" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;background-color:transparent;width:600px">
-							<tbody>
-								<tr>
-									<td align="left" style="padding:20px;Margin:0">
+									<td align="center" style="Margin:0;padding-top:0px;padding-right:20px;padding-bottom:0px;padding-left:20px">
 									<table cellpadding="0" cellspacing="0" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
 										<tbody>
 											<tr>
@@ -793,7 +629,219 @@ class TemplateGenerator:
 													<tbody>
 														<tr>
 															<td align="center" class="bk" style="padding:0;Margin:0">
-															<p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;color:#CCCCCC;font-size:12px">No longer want to receive these emails?&nbsp;<a href="[unsubscribe]" style="mso-line-height-rule:exactly;text-decoration:underline;color:#CCCCCC;font-size:12px" target="_blank">Unsubscribe</a>.</p>
+															<h1 style="Margin:0;font-family:arial, 'helvetica neue', helvetica, sans-serif;mso-line-height-rule:exactly;letter-spacing:0;font-size:32px;font-style:normal;font-weight:bold;line-height:38px;color:""" + hero_color + """>""" + content['hero_title'] + """</h1>
+															</td>
+														</tr>
+													</tbody>
+												</table>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						</td>
+					</tr>
+				</tbody>
+			</table>""")
+        
+        # Image section (if provided)
+        if image_data:
+            image_html = self._get_image_html(image_data, content['hero_title'], content.get('cta_url'))
+            html_parts.append("""<!-- IMAGE SECTION -->
+			<table align="center" cellpadding="0" cellspacing="0" class="t" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;width:100%;table-layout:fixed !important">
+				<tbody>
+					<tr>
+						<td align="center" style="padding:0;Margin:0">
+						<table align="center" bgcolor="#ffffff" cellpadding="0" cellspacing="0" class="bm" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;background-color:#ffffff;width:600px">
+							<tbody>
+								<tr>
+									<td align="center" style="Margin:0;padding-top:20px;padding-right:20px;padding-bottom:20px;padding-left:20px">
+									<table cellpadding="0" cellspacing="0" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
+										<tbody>
+											<tr>
+												<td align="center" style="padding:0;Margin:0;width:560px" valign="top">
+												<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
+													<tbody>
+														<tr>
+															<td align="center" class="bk" style="padding:0;Margin:0">
+															""" + image_html + """
+															</td>
+														</tr>
+													</tbody>
+												</table>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						</td>
+					</tr>
+				</tbody>
+			</table>""")
+        
+        # Content section
+        html_parts.append("""<!-- CONTENT SECTION -->
+			<table align="center" cellpadding="0" cellspacing="0" class="t" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;width:100%;table-layout:fixed !important">
+				<tbody>
+					<tr>
+						<td align="center" style="padding:0;Margin:0">
+						<table align="center" bgcolor="#ffffff" cellpadding="0" cellspacing="0" class="bm" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;background-color:#ffffff;width:600px">
+							<tbody>
+								<tr>
+									<td align="center" style="Margin:0;padding-top:20px;padding-right:20px;padding-bottom:20px;padding-left:20px">
+									<table cellpadding="0" cellspacing="0" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
+										<tbody>
+											<tr>
+												<td align="center" style="padding:0;Margin:0;width:560px" valign="top">
+												<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
+													<tbody>
+														<tr>
+															<td align="left" class="bk" style="padding:0;Margin:0">
+															<p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:24px;letter-spacing:0;font-size:16px;font-style:normal;font-weight:normal;color:#666666">""" + content['greeting'] + """</p>
+															</td>
+														</tr>
+														<tr>
+															<td align="left" class="bk" style="padding:0;Margin:0;padding-top:20px">
+															<p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:24px;letter-spacing:0;font-size:16px;font-style:normal;font-weight:normal;color:#666666">""" + content['main_content'] + """</p>
+															</td>
+														</tr>""")
+        
+        # Add urgency text if present
+        if content.get('urgency_text'):
+            html_parts.append("""														<tr>
+															<td align="left" class="bk" style="padding:0;Margin:0;padding-top:20px">
+															<p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:24px;letter-spacing:0;font-size:16px;font-style:normal;font-weight:bold;color:#FF6B35">""" + content['urgency_text'] + """</p>
+															</td>
+														</tr>""")
+        
+        # Add offer details if present
+        if content.get('offer_details'):
+            html_parts.append("""														<tr>
+															<td align="left" class="bk" style="padding:0;Margin:0;padding-top:20px">
+															<p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:24px;letter-spacing:0;font-size:16px;font-style:normal;font-weight:normal;color:#666666">""" + content['offer_details'] + """</p>
+															</td>
+														</tr>""")
+        
+        # CTA section
+        html_parts.append("""													</tbody>
+												</table>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+
+			<!-- CTA SECTION -->
+			<table align="center" cellpadding="0" cellspacing="0" class="t" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;width:100%;table-layout:fixed !important">
+				<tbody>
+					<tr>
+						<td align="center" style="padding:0;Margin:0">
+						<table align="center" bgcolor="#ffffff" cellpadding="0" cellspacing="0" class="bm" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;background-color:#ffffff;width:600px">
+							<tbody>
+								<tr>
+									<td align="center" style="Margin:0;padding-top:20px;padding-right:20px;padding-bottom:20px;padding-left:20px">
+									<table cellpadding="0" cellspacing="0" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
+										<tbody>
+											<tr>
+												<td align="center" style="padding:0;Margin:0;width:560px" valign="top">
+												<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
+													<tbody>
+														<tr>
+															<td align="center" class="bk" style="padding:0;Margin:0">
+															<h2 style="Margin:0;font-family:arial, 'helvetica neue', helvetica, sans-serif;mso-line-height-rule:exactly;letter-spacing:0;font-size:24px;font-style:normal;font-weight:bold;line-height:28px;color:#00CED1">🎯 Ready to Take Action?</h2>
+															</td>
+														</tr>
+														<tr>
+															<td align="center" class="bk" style="padding:0;Margin:0;padding-top:20px">
+															<a href="""" + content.get('cta_url', '#') + """" style="display:inline-block;background-color:#00CED1;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:6px;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:16px;font-weight:bold;line-height:1.2;text-align:center;margin:0;">""" + content['cta_text'] + """</a>
+															</td>
+														</tr>
+													</tbody>
+												</table>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						</td>
+					</tr>
+				</tbody>
+			</table>""")
+        
+        # Footer
+        html_parts.append("""<!-- FOOTER -->
+			<table align="center" cellpadding="0" cellspacing="0" class="t" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;width:100%;table-layout:fixed !important">
+				<tbody>
+					<tr>
+						<td align="center" style="padding:0;Margin:0">
+						<table align="center" bgcolor="#f8f9fa" cellpadding="0" cellspacing="0" class="bm" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;background-color:#f8f9fa;width:600px">
+							<tbody>
+								<tr>
+									<td align="center" style="Margin:0;padding-top:30px;padding-right:20px;padding-bottom:30px;padding-left:20px">
+									<table cellpadding="0" cellspacing="0" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
+										<tbody>
+											<tr>
+												<td align="center" style="padding:0;Margin:0;width:560px" valign="top">
+												<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
+													<tbody>
+														<tr>
+															<td align="center" class="bk" style="padding:0;Margin:0">
+															<h3 style="Margin:0;font-family:arial, 'helvetica neue', helvetica, sans-serif;mso-line-height-rule:exactly;letter-spacing:0;font-size:18px;font-style:normal;font-weight:bold;line-height:22px;color:#00CED1">KemisEmail – Delivering Local Deals and Offers Since 2005</h3>
+															</td>
+														</tr>
+														<tr>
+															<td align="center" class="bk" style="padding:0;Margin:0;padding-top:20px">
+															<p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;font-size:12px;font-style:normal;font-weight:normal;color:#666666">2025 © Kemis Group of Companies Inc. All rights reserved.</p>
+															</td>
+														</tr>
+														<tr>
+															<td align="center" class="bk" style="padding:0;Margin:0;padding-top:10px">
+															<p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;font-size:12px;font-style:normal;font-weight:normal;color:#666666">Nassau West, New Providence, The Bahamas</p>
+															</td>
+														</tr>
+														<tr>
+															<td align="center" class="bk" style="padding:0;Margin:0;padding-top:20px">
+															<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
+																<tbody>
+																	<tr>
+																		<td align="center" style="padding:0;Margin:0;padding-right:15px">
+																		<a href="https://dzvs3n3sqle.typeform.com/to/JxCYlnLb" style="text-decoration:none;color:#00CED1;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:normal;">Sign Up</a>
+																		</td>
+																		<td align="center" style="padding:0;Margin:0;padding-right:15px">
+																		<a href="#" style="text-decoration:none;color:#666666;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:normal;">Privacy Policy</a>
+																		</td>
+																		<td align="center" style="padding:0;Margin:0">
+																		<a href="#" style="text-decoration:none;color:#666666;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:normal;">Terms of Use</a>
+																		</td>
+																	</tr>
+																</tbody>
+															</table>
+															</td>
+														</tr>
+														<tr>
+															<td align="center" class="bk" style="padding:0;Margin:0;padding-top:20px">
+															<p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;font-size:12px;font-style:normal;font-weight:normal;color:#666666">You are receiving this because you signed up for our Deals and Offers list.</p>
+															</td>
+														</tr>
+														<tr>
+															<td align="center" class="bk" style="padding:0;Margin:0;padding-top:10px">
+															<p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;font-size:12px;font-style:normal;font-weight:normal;color:#666666">Click here to unsubscribe if this is no longer of interest.</p>
 															</td>
 														</tr>
 													</tbody>
@@ -810,12 +858,15 @@ class TemplateGenerator:
 					</tr>
 				</tbody>
 			</table>
-			</td>
-		</tr>
-	</tbody>
+		</td>
+	</tr>
+</tbody>
 </table>
 </body>
-</html>"""
+</html>""")
+        
+        # Join all parts
+        html_template = ''.join(html_parts)
         
         return html_template
     
