@@ -35,9 +35,11 @@ ENV/
 .env.production.local
 
 # Generated Files
-generated_template_*.html
-demo_*.html
-temp.html
+templates/generated_*.html
+templates/demo_*.html
+images/generated_*.jpg
+images/generated_*.png
+images/generated_*.jpeg
 
 # Images
 *.jpg

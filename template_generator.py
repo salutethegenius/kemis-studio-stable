@@ -461,14 +461,13 @@ class TemplateGenerator:
             }
     
     def create_html_template(self, content, image_data=None):
-        """Create the full HTML email template with Kemisemil styling"""
+        """Create the full HTML email template with original formatting"""
         
         # Determine hero title color based on content
-        hero_color = "#00CED1"  # Default turquoise
-        if "sale" in content['hero_title'].lower() or "deal" in content['hero_title'].lower():
-            hero_color = "#FF6B35"  # Orange for sales/deals
-        elif "flash" in content['hero_title'].lower():
-            hero_color = "#FFD700"  # Yellow for flash deals
+        hero_color = "#333333"  # Default dark gray like original
+        
+        # Get image HTML with CTA link if provided
+        image_html = self._get_image_html(image_data, content['subject_line'], content.get('cta_url'))
         
         html_template = f"""<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html dir="ltr" lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -480,7 +479,7 @@ class TemplateGenerator:
 	<style type="text/css">.rollover:hover .rollover-first {{ max-height:0px!important; display:none!important; }} .rollover:hover .rollover-second {{ max-height:none!important; display:block!important; }} .rollover span {{ font-size:0px; }} u + .body img ~ div div {{ display:none; }} #outlook a {{ padding:0; }} span.MsoHyperlink, span.MsoHyperlinkFollowed {{ color:inherit; mso-style-priority:99; }} a.ba {{ mso-style-priority:100!important; text-decoration:none!important; }} a[x-apple-data-detectors], #MessageViewBody a {{ color:inherit!important; text-decoration:none!important; font-size:inherit!important; font-family:inherit!important; font-weight:inherit!important; line-height:inherit!important; }} .q {{ display:none; float:left; overflow:hidden; width:0; max-height:0; line-height:0; mso-hide:all; }} @media only screen and (max-width:600px) {{.bw {{ padding-top:10px!important }} .bv {{ padding-bottom:10px!important }}
  .bu {{ padding-right:20px!important }} .bt {{ padding-left:20px!important }} .bs {{ padding-right:5px!important }} .br {{ padding-left:5px!important }} .bq {{ padding-left:0px!important }} .bp {{ padding-right:24px!important }} *[class="gmail-fix"] {{ display:none!important }} p, a {{ line-height:150%!important }} h1, h1 a {{ line-height:110%!important }} h2, h2 a {{ line-height:110%!important }} h3, h3 a {{ line-height:110%!important }} h4, h4 a {{ line-height:110%!important }} h5, h5 a {{ line-height:110%!important }} h6, h6 a {{ line-height:110%!important }} .bm p {{ }} .bl p {{ }} .bk p {{ }} h1 {{ font-size:36px!important; text-align:left }} h2 {{ font-size:26px!important; text-align:left }} h3 {{ font-size:20px!important; text-align:left }} h4 {{ font-size:24px!important; text-align:left }} h5 {{ font-size:20px!important; text-align:left }} h6 {{ font-size:16px!important; text-align:left }} .o td a {{ font-size:12px!important }} .bm p, .bm a {{ font-size:14px!important }}
  .bl p, .bl a {{ font-size:14px!important }} .bk p, .bk a {{ font-size:12px!important }} .bh, .bh h1, .bh h2, .bh h3, .bh h4, .bh h5, .bh h6 {{ text-align:center!important }} .bg .rollover:hover .rollover-second, .bh .rollover:hover .rollover-second, .bi .rollover:hover .rollover-second {{ display:inline!important }} a.ba, button.ba {{ font-size:20px!important; padding:10px 20px 10px 20px!important; line-height:120%!important }} a.ba, button.ba, .be {{ display:inline-block!important }} .z, .z .ba, .bb, .bb td, .o {{ display:inline-block!important }} .t table, .u table, .v table, .t, .v, .u {{ width:100%!important; max-width:600px!important }} .adapt-img {{ width:100%!important; height:auto!important }} .q {{ width:auto!important; overflow:visible!important; float:none!important; max-height:inherit!important; line-height:inherit!important }} tr.q {{ display:table-row!important }} .o td {{ width:1%!important }}
- table.n, .esd-block-html table {{ width:auto!important }} .h-auto {{ height:auto!important }} .l .m.e, .l .m.e * {{ font-size:13px!important; line-height:150%!important }} .k .d.e, .k .d.e * {{ font-size:16px!important; line-height:150%!important }} .j .i, .j .i * {{ font-size:48px!important; line-height:110%!important }} .h .i, .h .i * {{ font-size:48px!important; line-height:110%!important }} .f .g.e, .f .g.e * {{ font-size:22px!important; line-height:150%!important }} .c .d.e, .c .d.e * {{ font-size:16px!important; line-height:150%!important }} .a .b, .a .b * {{ font-size:14px!important; line-height:150%!important }} }} @media screen and (max-width:384px) {{.mail-message-content {{ width:414px!important }} }}
+ table.n, .esd-block-html table {{ width:auto!important }} .h-auto {{ height:auto!important }} .l .m.e, .l .m.e * {{ font-size:13px!important; line-height:150%!important }} .k .d.e, .k .d.e * {{ font-size:16px!important; line-height:150%!important }} .j .i, .j .i * {{ font-size:48px!important; line-height:110%!important }} .h .i, .j .i * {{ font-size:48px!important; line-height:110%!important }} .f .g.e, .f .g.e * {{ font-size:22px!important; line-height:150%!important }} .c .d.e, .c .d.e * {{ font-size:16px!important; line-height:150%!important }} .a .b, .a .b * {{ font-size:14px!important; line-height:150%!important }} }} @media screen and (max-width:384px) {{.mail-message-content {{ width:414px!important }} }}
 	</style>
 </head>
 <body class="body" style="width:100%;height:100%;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;padding:0;Margin:0">
@@ -525,82 +524,9 @@ class TemplateGenerator:
 				</tbody>
 			</table>
 
-			<!-- NEW KEMISEMAIL HEADER WITH MENU -->
-			<table align="center" cellpadding="0" cellspacing="0" class="t" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;width:100%;table-layout:fixed !important">
-				<tbody>
-					<tr>
-						<td align="center" style="padding:0;Margin:0">
-						<table align="center" bgcolor="#ffffff" cellpadding="0" cellspacing="0" class="bm" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;background-color:#ffffff;width:600px">
-							<tbody>
-								<tr>
-									<td align="center" style="Margin:0;padding-top:25px;padding-right:20px;padding-bottom:25px;padding-left:20px">
-									<table cellpadding="0" cellspacing="0" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
-										<tbody>
-											<tr>
-												<td align="center" style="padding:0;Margin:0;width:560px" valign="top">
-												<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
-													<tbody>
-														<tr>
-															<td align="left" style="padding:0;Margin:0;width:200px;vertical-align:middle">
-															<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
-																<tbody>
-																	<tr>
-																		<td align="left" style="padding:0;Margin:0;width:30px;vertical-align:middle">
-																		<!-- Email Icon -->
-																		<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;">
-																			<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="#00CED1" stroke-width="2" fill="none"/>
-																			<polyline points="4,6 12,13 20,6" stroke="#00CED1" stroke-width="2" fill="none"/>
-																		</svg>
-																		</td>
-																		<td align="left" style="padding:0;Margin:0;padding-left:5px;vertical-align:middle">
-																		<a href="https://start.kemis.net" style="text-decoration:none;color:#00CED1;">
-																		<h2 style="Margin:0;font-family:arial, 'helvetica neue', helvetica, sans-serif;mso-line-height-rule:exactly;letter-spacing:0;font-size:18px;font-style:normal;font-weight:bold;line-height:22px;color:#00CED1">KemisEmail</h2>
-																		</a>
-																		</td>
-																	</tr>
-																</tbody>
-															</table>
-															</td>
-															<td align="center" style="padding:0;Margin:0;width:200px;vertical-align:middle">
-															<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
-																<tbody>
-																	<tr>
-																		<td align="center" style="padding:0;Margin:0;padding-right:15px">
-																		<a href="https://kemis.net" style="text-decoration:none;color:#666666;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:normal;">Home</a>
-																		</td>
-																		<td align="center" style="padding:0;Margin:0;padding-right:15px">
-																		<a href="https://start.kemis.net/services" style="text-decoration:none;color:#666666;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:normal;">Services</a>
-																		</td>
-																		<td align="center" style="padding:0;Margin:0;padding-right:15px">
-																		<a href="https://start.kemis.net/statistics" style="text-decoration:none;color:#666666;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:normal;">Statistics</a>
-																		</td>
-																		<td align="center" style="padding:0;Margin:0">
-																		<a href="https://start.kemis.net/contact" style="text-decoration:none;color:#666666;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:normal;">Contact</a>
-																		</td>
-																	</tr>
-																</tbody>
-															</table>
-															</td>
-															<td align="right" style="padding:0;Margin:0;width:160px;vertical-align:middle">
-															<a href="https://dzvs3n3sqle.typeform.com/to/JxCYlnLb" style="display:inline-block;background-color:#00CED1;color:#ffffff;text-decoration:none;padding:8px 16px;border-radius:4px;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:bold;line-height:1.2;text-align:center;margin:0;">Join Our List</a>
-															</td>
-														</tr>
-													</tbody>
-												</table>
-												</td>
-											</tr>
-										</tbody>
-									</table>
-									</td>
-								</tr>
-							</tbody>
-						</table>
-						</td>
-					</tr>
-				</tbody>
+			<table align="center" cellpadding="0" cellspacing="0" class="u" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;width:100%;table-layout:fixed !important;background-color:transparent;background-repeat:repeat;background-position:center top">
 			</table>
 
-			<!-- MAIN CONTENT SECTION -->
 			<table align="center" cellpadding="0" cellspacing="0" class="t" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;width:100%;table-layout:fixed !important">
 				<tbody>
 					<tr>
@@ -612,22 +538,34 @@ class TemplateGenerator:
 									<table cellpadding="0" cellspacing="0" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
 										<tbody>
 											<tr>
-												<td align="center" style="padding:0;Margin:0;font-size:0px">
-													{self._get_image_html(image_data, content['subject_line'], content['cta_url'])}
-												</td>
-											</tr>
-											<tr class="r">
-												<td align="center" class="j" style="Margin:0;padding-top:15px;padding-right:35px;padding-bottom:15px;padding-left:35px">
-												<h1 class="bh i e" style="Margin:0;font-family:arial, 'helvetica neue', helvetica, sans-serif;mso-line-height-rule:exactly;letter-spacing:0;font-size:72px;font-style:normal;font-weight:bold;line-height:64.8px;color:{hero_color}">{content['hero_title']}</h1>
-												</td>
-											</tr>
-											<tr>
-												<td align="left" class="c bt bu" style="Margin:0;padding-top:3px;padding-bottom:3px;padding-right:30px;padding-left:30px">
-												<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:27px;letter-spacing:0;color:#333333;font-size:18px;text-align:center">{content['greeting']}</p>
+												<td align="center" style="padding:0;Margin:0;width:560px" valign="top">
+												<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
+													<tbody>
+														<tr>
+															<td align="center" style="padding:0;Margin:0;font-size:0px">{image_html}</td>
+														</tr>
+														<tr class="r">
+															<td align="center" class="j" style="Margin:0;padding-top:15px;padding-right:35px;padding-bottom:15px;padding-left:35px">
+															<h1 class="bh i e" style="Margin:0;font-family:arial, 'helvetica neue', helvetica, sans-serif;mso-line-height-rule:exactly;letter-spacing:0;font-size:72px;font-style:normal;font-weight:bold;line-height:64.8px;color:#333333">{content['hero_title']}</h1>
+															</td>
+														</tr>
+														<!--[if !mso]><!-- -->
+														<!--<![endif]-->
+														<tr>
+															<td align="left" class="c bt bu" style="Margin:0;padding-top:3px;padding-bottom:3px;padding-right:30px;padding-left:30px">
+															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:27px;letter-spacing:0;color:#333333;font-size:18px;text-align:center">{content['greeting']}</p>
 
-												<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:27px;letter-spacing:0;color:#333333;font-size:18px;text-align:center">&nbsp;</p>
+															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:27px;letter-spacing:0;color:#333333;font-size:18px;text-align:center">&nbsp;</p>
 
-												<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:27px;letter-spacing:0;color:#333333;font-size:18px;text-align:center">{content['main_content']}</p>
+															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:27px;letter-spacing:0;color:#333333;font-size:18px;text-align:center">{content['main_content']}</p>
+
+															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:27px;letter-spacing:0;color:#333333;font-size:18px;text-align:center">&nbsp;</p>
+
+															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:27px;letter-spacing:0;color:#333333;font-size:18px;text-align:center">{content.get('offer_details', '')}</p>
+															</td>
+														</tr>
+													</tbody>
+												</table>
 												</td>
 											</tr>
 										</tbody>
@@ -644,17 +582,17 @@ class TemplateGenerator:
 													<tbody>
 														<tr>
 															<td align="center" class="k" style="padding:0;Margin:0;padding-top:20px;padding-right:20px;padding-left:20px">
-															<h3 class="bh e d" style="Margin:0;font-family:arial, 'helvetica neue', helvetica, sans-serif;mso-line-height-rule:exactly;letter-spacing:0;font-size:18px;font-style:normal;font-weight:bold;line-height:21.6px;color:#333333">🎯 Ready to Take Action?</h3>
+															<h3 class="bh e d" style="Margin:0;font-family:arial, 'helvetica neue', helvetica, sans-serif;mso-line-height-rule:exactly;letter-spacing:0;font-size:18px;font-style:normal;font-weight:bold;line-height:21.6px;color:#333333">🚨Limited Time Offer🚨</h3>
 															</td>
 														</tr>
 														<tr>
 															<td align="center" class="f br bs" style="Margin:0;padding-right:20px;padding-left:20px;padding-bottom:20px;padding-top:10px">
-															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:24px;letter-spacing:0;color:#333333;font-size:16px;text-align:center">{content.get('offer_details', 'Don\'t miss out on this incredible opportunity!')}</p>
+															<h1 class="bh e g" style="Margin:0;font-family:arial, 'helvetica neue', helvetica, sans-serif;mso-line-height-rule:exactly;letter-spacing:0;font-size:30px;font-style:normal;font-weight:bold;line-height:36px;color:#333333"><span style="font-size:24px;">{content.get('urgency_text', 'Don\'t miss out on this amazing offer!')}<sub style="display:inline-block;font-size:83% !important;line-height:1 !important;vertical-align:bottom;mso-text-raise:-30%">&nbsp;</sub></span></h1>
 															</td>
 														</tr>
 														<tr>
 															<td align="center" style="Margin:0;padding-bottom:20px;padding-left:20px;padding-right:20px">
-															<a href="{content['cta_url']}" target="_blank" style="display:inline-block;background-color:#00CED1;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:6px;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:16px;font-weight:bold;line-height:1.2;text-align:center;margin:0;">{content['cta_text']}</a>
+															<a href="{content['cta_url']}" target="_blank" style="display:inline-block;background-color:#E31E24;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:6px;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:16px;font-weight:bold;line-height:1.2;text-align:center;margin:0;">{content['cta_text']}</a>
 															</td>
 														</tr>
 													</tbody>
@@ -694,7 +632,7 @@ class TemplateGenerator:
 															<table cellpadding="0" cellspacing="0" class="n bb" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px">
 																<tbody>
 																	<tr>
-																		<td align="center" class="bp" style="padding:0;Margin:0;padding-right:28px" valign="top"><a href="https://start.kemis.net" style="mso-line-height-rule:exactly;text-decoration:underline;color:#333333;font-size:12px" target="_blank"><img alt="Website" height="26" src="https://frhuwic.stripocdn.email/content/assets/img/other-icons/logo-black/link-logo-black.png" style="display: block; font-size: 14px; border: 0px; outline: none; text-decoration: none; width: 26px; height: 26px;" title="Website" width="26" /></a>
+																		<td align="center" class="bp" style="padding:0;Margin:0;padding-right:28px" valign="top"><a href="https://www.kemis.net" style="mso-line-height-rule:exactly;text-decoration:underline;color:#333333;font-size:12px" target="_blank"><img alt="Website" height="26" src="https://frhuwic.stripocdn.email/content/assets/img/other-icons/logo-black/link-logo-black.png" style="display: block; font-size: 14px; border: 0px; outline: none; text-decoration: none; width: 26px; height: 26px;" title="Website" width="26" /></a>
 
 																		<p style="text-align: center;">&nbsp;</p>
 																		</td>
@@ -708,7 +646,7 @@ class TemplateGenerator:
 														</tr>
 														<tr class="r">
 															<td align="center" class="a" style="padding:0;Margin:0;padding-bottom:35px">
-															<p class="b" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px"><strong>KemisEmail</strong> – Delivering Local Deals and Offers Since 2005</p>
+															<p class="b" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px"><strong>Kemis EMAIL</strong></p>
 
 															<p class="b" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">2025 &copy; Kemis Group of Companies Inc. All rights reserved.</p>
 
@@ -718,11 +656,11 @@ class TemplateGenerator:
 														<!--[if !mso]><!-- -->
 														<tr class="q" style="display:none;float:left;overflow:hidden;width:0;max-height:0;line-height:0;mso-hide:all">
 															<td align="center" class="l" style="padding:0;Margin:0;padding-bottom:35px">
-															<p class="e m" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;color:#333333;font-size:12px"><strong>KemisEmail</strong> – Delivering Local Deals and Offers Since 2005</p>
+															<p class="e m" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;color:#333333;font-size:12px"><strong>Kemis EMAIL</strong></p>
 
 															<p class="e m" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;color:#333333;font-size:12px">2025 &copy; Kemis Group of Companies Inc. All rights reserved.</p>
 
-															<p class="e m" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;color:#333333;font-size:12px">Nassau West, New Providence, The Providence, The Bahamas</p>
+															<p class="e m" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;color:#333333;font-size:12px">Nassau West, New Providence, The Bahamas</p>
 															</td>
 														</tr>
 														<!--<![endif]-->
@@ -735,10 +673,10 @@ class TemplateGenerator:
 																		<div style="vertical-align:middle;display:block"><a href="https://dzvs3n3sqle.typeform.com/to/JxCYlnLb" style="mso-line-height-rule:exactly;text-decoration:none;font-family:arial, 'helvetica neue', helvetica, sans-serif;display:block;color:#999999;font-size:12px" target="_blank">Sign Up</a></div>
 																		</td>
 																		<td align="center" style="Margin:0;border:0;padding-bottom:5px;padding-top:5px;padding-right:5px;padding-left:5px;border-left:1px solid #cccccc" valign="top" width="33.33%">
-																		<div style="vertical-align:middle;display:block"><a href="#" style="mso-line-height-rule:exactly;text-decoration:none;font-family:arial, 'helvetica neue', helvetica, sans-serif;display:block;color:#999999;font-size:12px" target="_blank">Privacy Policy</a></div>
+																		<div style="vertical-align:middle;display:block"><a href="https://kemisdigital.com/policies/refund-policy" style="mso-line-height-rule:exactly;text-decoration:none;font-family:arial, 'helvetica neue', helvetica, sans-serif;display:block;color:#999999;font-size:12px" target="_blank">Privacy Policy</a></div>
 																		</td>
 																		<td align="center" style="Margin:0;border:0;padding-bottom:5px;padding-top:5px;padding-right:5px;padding-left:5px;border-left:1px solid #cccccc" valign="top" width="33.33%">
-																		<div style="vertical-align:middle;display:block"><a href="#" style="mso-line-height-rule:exactly;text-decoration:none;font-family:arial, 'helvetica neue', helvetica, sans-serif;display:block;color:#999999;font-size:12px" target="_blank">Terms of Use</a></div>
+																		<div style="vertical-align:middle;display:block"><a href="https://kemisdigital.com/policies/terms-of-service" style="mso-line-height-rule:exactly;text-decoration:none;font-family:arial, 'helvetica neue', helvetica, sans-serif;display:block;color:#999999;font-size:12px" target="_blank">Terms of Use</a></div>
 																		</td>
 																	</tr>
 																</tbody>
@@ -776,8 +714,7 @@ class TemplateGenerator:
 													<tbody>
 														<tr>
 															<td align="center" class="bk" style="padding:0;Margin:0">
-															<p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;color:#666666;font-size:12px">You are receiving this because you signed up for our Deals and Offers list.</p>
-															<p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;color:#666666;font-size:12px"><a href="[unsubscribe]" style="mso-line-height-rule:exactly;text-decoration:underline;color:#666666;font-size:12px" target="_blank">Click here to unsubscribe</a> if this is no longer of interest.</p>
+															<p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;color:#CCCCCC;font-size:12px">No longer want to receive these emails?&nbsp;<a href="[unsubscribe]" style="mso-line-height-rule:exactly;text-decoration:underline;color:#CCCCCC;font-size:12px" target="_blank">Unsubscribe</a>.</p>
 															</td>
 														</tr>
 													</tbody>
@@ -800,6 +737,7 @@ class TemplateGenerator:
 </table>
 </body>
 </html>"""
+        
         return html_template
     
     def _get_image_html(self, image_data, alt_text, cta_url=None):
@@ -865,12 +803,44 @@ def generate_template():
         # Create HTML template
         html_template = generator.create_html_template(content, image_data)
         
-        # Save to file
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"generated_template_{timestamp}.html"
+        # Create campaign name from subject line
+        import re
+        campaign_name = re.sub(r'[^a-zA-Z0-9\s-]', '', content['subject_line'])
+        campaign_name = re.sub(r'\s+', '-', campaign_name.strip())
+        campaign_name = campaign_name[:50]  # Limit length
         
-        with open(filename, 'w', encoding='utf-8') as f:
+        # Save template to templates folder
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        template_filename = f"templates/{campaign_name}_{timestamp}.html"
+        
+        # Ensure templates directory exists
+        import os
+        os.makedirs('templates', exist_ok=True)
+        
+        with open(template_filename, 'w', encoding='utf-8') as f:
             f.write(html_template)
+        
+        # Save image to images folder if it's base64 data
+        if image_data and image_data.startswith('data:image'):
+            import base64
+            try:
+                # Extract image data from base64
+                image_format = image_data.split(';')[0].split('/')[1]
+                image_data_clean = image_data.split(',')[1]
+                image_bytes = base64.b64decode(image_data_clean)
+                
+                # Save to images folder
+                os.makedirs('images', exist_ok=True)
+                image_filename = f"images/{campaign_name}_{timestamp}.{image_format}"
+                
+                with open(image_filename, 'wb') as f:
+                    f.write(image_bytes)
+                
+                print(f"💾 Saved image: {image_filename}")
+            except Exception as e:
+                print(f"⚠️ Could not save image: {e}")
+        
+        filename = template_filename
         
         # Check template size before returning
         html_size = len(html_template.encode('utf-8'))
@@ -923,7 +893,12 @@ def generate_template():
 @app.route('/download/<filename>')
 def download_template(filename):
     try:
-        return send_file(filename, as_attachment=True)
+        # Check if file exists in templates folder
+        template_path = f"templates/{filename}"
+        if os.path.exists(template_path):
+            return send_file(template_path, as_attachment=True)
+        else:
+            return jsonify({'error': 'Template file not found'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 404
 
