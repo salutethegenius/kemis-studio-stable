@@ -464,10 +464,11 @@ class TemplateGenerator:
         """Create the full HTML email template with original formatting"""
         
         # Determine hero title color based on content
-        hero_color = "#333333"  # Default dark gray like original
-        
-        # Get image HTML with CTA link if provided
-        image_html = self._get_image_html(image_data, content['subject_line'], content.get('cta_url'))
+        hero_color = "#00CED1"  # Default turquoise
+        if "sale" in content['hero_title'].lower() or "deal" in content['hero_title'].lower():
+            hero_color = "#FF6B35"  # Orange for sales/deals
+        elif "flash" in content['hero_title'].lower():
+            hero_color = "#FFD700"  # Yellow for flash deals
         
         html_template = f"""<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html dir="ltr" lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -524,9 +525,82 @@ class TemplateGenerator:
 				</tbody>
 			</table>
 
-			<table align="center" cellpadding="0" cellspacing="0" class="u" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;width:100%;table-layout:fixed !important;background-color:transparent;background-repeat:repeat;background-position:center top">
+			<!-- NEW KEMISEMAIL HEADER WITH MENU -->
+			<table align="center" cellpadding="0" cellspacing="0" class="t" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;width:100%;table-layout:fixed !important">
+				<tbody>
+					<tr>
+						<td align="center" style="padding:0;Margin:0">
+						<table align="center" bgcolor="#ffffff" cellpadding="0" cellspacing="0" class="bm" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;background-color:#ffffff;width:600px">
+							<tbody>
+								<tr>
+									<td align="center" style="Margin:0;padding-top:25px;padding-right:20px;padding-bottom:25px;padding-left:20px">
+									<table cellpadding="0" cellspacing="0" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
+										<tbody>
+											<tr>
+												<td align="center" style="padding:0;Margin:0;width:560px" valign="top">
+												<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
+													<tbody>
+														<tr>
+															<td align="left" style="padding:0;Margin:0;width:200px;vertical-align:middle">
+															<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
+																<tbody>
+																	<tr>
+																		<td align="left" style="padding:0;Margin:0;width:30px;vertical-align:middle">
+																		<!-- Email Icon -->
+																		<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;">
+																			<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="#00CED1" stroke-width="2" fill="none"/>
+																			<polyline points="4,6 12,13 20,6" stroke="#00CED1" stroke-width="2" fill="none"/>
+																		</svg>
+																		</td>
+																		<td align="left" style="padding:0;Margin:0;padding-left:5px;vertical-align:middle">
+																		<a href="https://start.kemis.net" style="text-decoration:none;color:#00CED1;">
+																		<h2 style="Margin:0;font-family:arial, 'helvetica neue', helvetica, sans-serif;mso-line-height-rule:exactly;letter-spacing:0;font-size:18px;font-style:normal;font-weight:bold;line-height:22px;color:#00CED1">KemisEmail</h2>
+																		</a>
+																		</td>
+																	</tr>
+																</tbody>
+															</table>
+															</td>
+															<td align="center" style="padding:0;Margin:0;width:200px;vertical-align:middle">
+															<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
+																<tbody>
+																	<tr>
+																		<td align="center" style="padding:0;Margin:0;padding-right:15px">
+																		<a href="https://kemis.net" style="text-decoration:none;color:#666666;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:normal;">Home</a>
+																		</td>
+																		<td align="center" style="padding:0;Margin:0;padding-right:15px">
+																		<a href="https://start.kemis.net/services" style="text-decoration:none;color:#666666;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:normal;">Services</a>
+																		</td>
+																		<td align="center" style="padding:0;Margin:0;padding-right:15px">
+																		<a href="https://start.kemis.net/statistics" style="text-decoration:none;color:#666666;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:normal;">Statistics</a>
+																		</td>
+																		<td align="center" style="padding:0;Margin:0">
+																		<a href="https://start.kemis.net/contact" style="text-decoration:none;color:#666666;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:normal;">Contact</a>
+																		</td>
+																	</tr>
+																</tbody>
+															</table>
+															</td>
+															<td align="right" style="padding:0;Margin:0;width:160px;vertical-align:middle">
+															<a href="https://dzvs3n3sqle.typeform.com/to/JxCYlnLb" style="display:inline-block;background-color:#00CED1;color:#ffffff;text-decoration:none;padding:8px 16px;border-radius:4px;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:bold;line-height:1.2;text-align:center;margin:0;">Join Our List</a>
+															</td>
+														</tr>
+													</tbody>
+												</table>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						</td>
+					</tr>
+				</tbody>
 			</table>
 
+			<!-- MAIN CONTENT SECTION -->
 			<table align="center" cellpadding="0" cellspacing="0" class="t" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;width:100%;table-layout:fixed !important">
 				<tbody>
 					<tr>
@@ -542,15 +616,15 @@ class TemplateGenerator:
 												<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
 													<tbody>
 														<tr>
-															<td align="center" style="padding:0;Margin:0;font-size:0px">{image_html}</td>
+															<td align="center" style="padding:0;Margin:0;font-size:0px">
+																{self._get_image_html(image_data, content['subject_line'], content['cta_url'])}
+															</td>
 														</tr>
 														<tr class="r">
 															<td align="center" class="j" style="Margin:0;padding-top:15px;padding-right:35px;padding-bottom:15px;padding-left:35px">
-															<h1 class="bh i e" style="Margin:0;font-family:arial, 'helvetica neue', helvetica, sans-serif;mso-line-height-rule:exactly;letter-spacing:0;font-size:72px;font-style:normal;font-weight:bold;line-height:64.8px;color:#333333">{content['hero_title']}</h1>
+															<h1 class="bh i e" style="Margin:0;font-family:arial, 'helvetica neue', helvetica, sans-serif;mso-line-height-rule:exactly;letter-spacing:0;font-size:72px;font-style:normal;font-weight:bold;line-height:64.8px;color:{hero_color}">{content['hero_title']}</h1>
 															</td>
 														</tr>
-														<!--[if !mso]><!-- -->
-														<!--<![endif]-->
 														<tr>
 															<td align="left" class="c bt bu" style="Margin:0;padding-top:3px;padding-bottom:3px;padding-right:30px;padding-left:30px">
 															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:27px;letter-spacing:0;color:#333333;font-size:18px;text-align:center">{content['greeting']}</p>
@@ -558,10 +632,6 @@ class TemplateGenerator:
 															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:27px;letter-spacing:0;color:#333333;font-size:18px;text-align:center">&nbsp;</p>
 
 															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:27px;letter-spacing:0;color:#333333;font-size:18px;text-align:center">{content['main_content']}</p>
-
-															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:27px;letter-spacing:0;color:#333333;font-size:18px;text-align:center">&nbsp;</p>
-
-															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:27px;letter-spacing:0;color:#333333;font-size:18px;text-align:center">{content.get('offer_details', '')}</p>
 															</td>
 														</tr>
 													</tbody>
@@ -582,17 +652,17 @@ class TemplateGenerator:
 													<tbody>
 														<tr>
 															<td align="center" class="k" style="padding:0;Margin:0;padding-top:20px;padding-right:20px;padding-left:20px">
-															<h3 class="bh e d" style="Margin:0;font-family:arial, 'helvetica neue', helvetica, sans-serif;mso-line-height-rule:exactly;letter-spacing:0;font-size:18px;font-style:normal;font-weight:bold;line-height:21.6px;color:#333333">🚨Limited Time Offer🚨</h3>
+															<h3 class="bh e d" style="Margin:0;font-family:arial, 'helvetica neue', helvetica, sans-serif;mso-line-height-rule:exactly;letter-spacing:0;font-size:18px;font-style:normal;font-weight:bold;line-height:21.6px;color:#333333">🎯 Ready to Take Action?</h3>
 															</td>
 														</tr>
 														<tr>
 															<td align="center" class="f br bs" style="Margin:0;padding-right:20px;padding-left:20px;padding-bottom:20px;padding-top:10px">
-															<h1 class="bh e g" style="Margin:0;font-family:arial, 'helvetica neue', helvetica, sans-serif;mso-line-height-rule:exactly;letter-spacing:0;font-size:30px;font-style:normal;font-weight:bold;line-height:36px;color:#333333"><span style="font-size:24px;">{content.get('urgency_text', 'Don\'t miss out on this amazing offer!')}<sub style="display:inline-block;font-size:83% !important;line-height:1 !important;vertical-align:bottom;mso-text-raise:-30%">&nbsp;</sub></span></h1>
+															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:24px;letter-spacing:0;color:#333333;font-size:16px;text-align:center">{content.get('offer_details', 'Don\'t miss out on this incredible opportunity!')}</p>
 															</td>
 														</tr>
 														<tr>
 															<td align="center" style="Margin:0;padding-bottom:20px;padding-left:20px;padding-right:20px">
-															<a href="{content['cta_url']}" target="_blank" style="display:inline-block;background-color:#E31E24;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:6px;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:16px;font-weight:bold;line-height:1.2;text-align:center;margin:0;">{content['cta_text']}</a>
+															<a href="{content['cta_url']}" target="_blank" style="display:inline-block;background-color:#00CED1;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:6px;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:16px;font-weight:bold;line-height:1.2;text-align:center;margin:0;">{content['cta_text']}</a>
 															</td>
 														</tr>
 													</tbody>
@@ -646,7 +716,7 @@ class TemplateGenerator:
 														</tr>
 														<tr class="r">
 															<td align="center" class="a" style="padding:0;Margin:0;padding-bottom:35px">
-															<p class="b" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px"><strong>Kemis EMAIL</strong></p>
+															<p class="b" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px"><strong>KemisEmail</strong> – Delivering Local Deals and Offers Since 2005</p>
 
 															<p class="b" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">2025 &copy; Kemis Group of Companies Inc. All rights reserved.</p>
 
@@ -656,7 +726,7 @@ class TemplateGenerator:
 														<!--[if !mso]><!-- -->
 														<tr class="q" style="display:none;float:left;overflow:hidden;width:0;max-height:0;line-height:0;mso-hide:all">
 															<td align="center" class="l" style="padding:0;Margin:0;padding-bottom:35px">
-															<p class="e m" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;color:#333333;font-size:12px"><strong>Kemis EMAIL</strong></p>
+															<p class="e m" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;color:#333333;font-size:12px"><strong>KemisEmail</strong> – Delivering Local Deals and Offers Since 2005</p>
 
 															<p class="e m" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;color:#333333;font-size:12px">2025 &copy; Kemis Group of Companies Inc. All rights reserved.</p>
 
