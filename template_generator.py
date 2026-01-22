@@ -373,25 +373,24 @@ class TemplateGenerator:
                 list_ids = 'DU0p7BsJdnwE0MXNZusbMQ,fO6BdhtVFBdzyQBMcG6Yiw'
             
             # Determine send_campaign value and schedule_date_time based on send_option
-                # Format datetime for Sendy API (requires "Month Day, Year h:mmam/pm" format)
-                schedule_date_time_str = None
-                if send_option == 'send_now':
-                    send_campaign_value = '1'
-                elif send_option == 'schedule' and scheduled_datetime:
-                    # Convert Unix timestamp to datetime object
-                    schedule_dt = datetime.fromtimestamp(int(scheduled_datetime))
-                    
-                    # Round minutes to nearest 5-minute increment (Sendy requirement)
-                    minutes = schedule_dt.minute
-                    rounded_minutes = round(minutes / 5) * 5
-                    if rounded_minutes == 60:
-                        rounded_minutes = 0
-                        schedule_dt = schedule_dt.replace(hour=schedule_dt.hour + 1, minute=0)
-                    else:
-                        schedule_dt = schedule_dt.replace(minute=rounded_minutes)
-                    
-                    # Format as "Month Day, Year h:mmam/pm" (e.g., "June 15, 2021 6:05pm")
-                    # Use %-d on Linux/Mac or %#d on Windows to remove leading zero, but for compatibility use manual replacement
+            schedule_date_time_str = None
+            if send_option == 'send_now':
+                send_campaign_value = '1'
+            elif send_option == 'schedule' and scheduled_datetime:
+                # Convert Unix timestamp to datetime object
+                schedule_dt = datetime.fromtimestamp(int(scheduled_datetime))
+                
+                # Round minutes to nearest 5-minute increment (Sendy requirement)
+                minutes = schedule_dt.minute
+                rounded_minutes = round(minutes / 5) * 5
+                if rounded_minutes == 60:
+                    rounded_minutes = 0
+                    schedule_dt = schedule_dt.replace(hour=schedule_dt.hour + 1, minute=0)
+                else:
+                    schedule_dt = schedule_dt.replace(minute=rounded_minutes)
+                
+                # Format as "Month Day, Year h:mmam/pm" (e.g., "June 15, 2021 6:05pm")
+                # Use %-d on Linux/Mac or %#d on Windows to remove leading zero, but for compatibility use manual replacement
                 schedule_date_time_str = schedule_dt.strftime("%B %d, %Y %I:%M%p").lower()
                 # Remove leading zero from day if present (e.g., "June 05, 2021" -> "June 5, 2021")
                 schedule_date_time_str = re.sub(r'(\w+)\s+0(\d),', r'\1 \2,', schedule_date_time_str)
