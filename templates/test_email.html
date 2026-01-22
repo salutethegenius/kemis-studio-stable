@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Test Page - KemisEmail</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            padding: 40px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #2c2c2c;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+            border-bottom: 2px solid #00CED1;
+        }
+        
+        .header h1 {
+            color: #00CED1;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        
+        .header p {
+            color: #cccccc;
+            font-size: 16px;
+        }
+        
+        .test-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            background: #1a1a1a;
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid #404040;
+        }
+        
+        .test-section h3 {
+            color: #00CED1;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #404040;
+            border-radius: 6px;
+            background: #2c2c2c;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #00CED1;
+        }
+        
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background: #00CED1;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #00B8B8;
+        }
+        
+        .btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: #666;
+        }
+        
+        .btn-secondary:hover {
+            background: #555;
+        }
+        
+        .config-section {
+            background: #1a1a1a;
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid #404040;
+            margin-bottom: 30px;
+        }
+        
+        .config-section h3 {
+            color: #00CED1;
+            margin-bottom: 20px;
+        }
+        
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .config-item {
+            background: #2c2c2c;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 3px solid #00CED1;
+        }
+        
+        .config-item h4 {
+            color: #ffffff;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .config-item p {
+            color: #cccccc;
+            font-size: 12px;
+            margin: 0;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-success {
+            background: #27ae60;
+        }
+        
+        .status-error {
+            background: #e74c3c;
+        }
+        
+        .status-warning {
+            background: #f39c12;
+        }
+        
+        .results {
+            background: #1a1a1a;
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid #404040;
+            margin-top: 30px;
+        }
+        
+        .results h3 {
+            color: #00CED1;
+            margin-bottom: 20px;
+        }
+        
+        .result-item {
+            background: #2c2c2c;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border-left: 3px solid #404040;
+        }
+        
+        .result-item.success {
+            border-left-color: #27ae60;
+        }
+        
+        .result-item.error {
+            border-left-color: #e74c3c;
+        }
+        
+        .result-item h4 {
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+        
+        .result-item p {
+            color: #cccccc;
+            margin: 0;
+        }
+        
+        .loading {
+            display: none;
+            color: #00CED1;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #404040;
+            border-top-color: #00CED1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .curl-command {
+            background: #000000;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #00ff00;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+        
+        .test-history {
+            background: #1a1a1a;
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid #404040;
+            margin-top: 30px;
+        }
+        
+        .test-history h3 {
+            color: #00CED1;
+            margin-bottom: 20px;
+        }
+        
+        .history-item {
+            background: #2c2c2c;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 3px solid #404040;
+        }
+        
+        .history-item.success {
+            border-left-color: #27ae60;
+        }
+        
+        .history-item.error {
+            border-left-color: #e74c3c;
+        }
+        
+        .history-timestamp {
+            color: #999;
+            font-size: 12px;
+        }
+        
+        @media (max-width: 768px) {
+            .test-sections {
+                grid-template-columns: 1fr;
+            }
+            
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Email Test Page</h1>
+            <p>Diagnose and test email delivery issues with KemisEmail</p>
+        </div>
+        
+        <!-- Configuration Check Section -->
+        <div class="config-section">
+            <h3>📋 Configuration Status</h3>
+            <button class="btn" onclick="checkConfiguration()">Check Configuration</button>
+            <div id="config-results"></div>
+        </div>
+        
+        <!-- Test Sections -->
+        <div class="test-sections">
+            <!-- Direct Test Section -->
+            <div class="test-section">
+                <h3>📧 Direct Test Email</h3>
+                <p style="color: #cccccc; margin-bottom: 20px; font-size: 14px;">
+                    Send a minimal test email directly to the specified email address only (not to mailing lists).
+                </p>
+                
+                <div class="form-group">
+                    <label for="test-email">Recipient Email:</label>
+                    <input type="email" id="test-email" placeholder="your-email@example.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="test-subject">Subject:</label>
+                    <input type="text" id="test-subject" placeholder="Test Email from KemisEmail" value="Test Email from KemisEmail">
+                </div>
+                
+                <div class="form-group">
+                    <label for="test-body">Message:</label>
+                    <textarea id="test-body" placeholder="This is a test email to verify email delivery.">This is a test email to verify email delivery.</textarea>
+                </div>
+                
+                <button class="btn" onclick="sendDirectTest()">Send Direct Test</button>
+            </div>
+            
+            <!-- Campaign Test Section -->
+            <div class="test-section">
+                <h3>📬 Campaign Test</h3>
+                <p style="color: #cccccc; margin-bottom: 20px; font-size: 14px;">
+                    Test using the full campaign creation process. Sends only to the specified email address.
+                </p>
+                
+                <div class="form-group">
+                    <label for="campaign-email">Recipient Email:</label>
+                    <input type="email" id="campaign-email" placeholder="your-email@example.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="campaign-subject">Subject:</label>
+                    <input type="text" id="campaign-subject" placeholder="Campaign Test Email" value="Campaign Test Email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="campaign-body">Message:</label>
+                    <textarea id="campaign-body" placeholder="This is a campaign test email.">This is a campaign test email with full template.</textarea>
+                </div>
+                
+                <button class="btn" onclick="sendCampaignTest()">Send Campaign Test</button>
+            </div>
+        </div>
+        
+        <!-- Loading Indicator -->
+        <div class="loading" id="loading">
+            <span class="spinner"></span> Processing...
+        </div>
+        
+        <!-- Results Section -->
+        <div class="results" id="results" style="display: none;">
+            <h3>📊 Test Results</h3>
+            <div id="results-content"></div>
+        </div>
+        
+        <!-- Test History -->
+        <div class="test-history">
+            <h3>📜 Test History</h3>
+            <div id="test-history-content">
+                <p style="color: #666; font-style: italic;">No tests performed yet.</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let testHistory = [];
+        
+        // Check configuration on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            checkConfiguration();
+        });
+        
+        async function checkConfiguration() {
+            const configDiv = document.getElementById('config-results');
+            configDiv.innerHTML = '<div class="loading"><span class="spinner"></span> Checking configuration...</div>';
+            
+            try {
+                const response = await fetch('/verify-email-config');
+                const data = await response.json();
+                
+                let html = '<div class="config-grid">';
+                
+                if (data.success && data.config) {
+                    const config = data.config;
+                    
+                    // Sendy Accessibility
+                    html += `<div class="config-item">
+                        <h4><span class="status-indicator ${config.sendy_accessible ? 'status-success' : 'status-error'}"></span>Sendy Access</h4>
+                        <p>${config.sendy_accessible ? '✅ Accessible' : '❌ Not accessible'}</p>
+                        ${config.sendy_error ? `<p style="color: #e74c3c;">Error: ${config.sendy_error}</p>` : ''}
+                    </div>`;
+                    
+                    // API Key
+                    html += `<div class="config-item">
+                        <h4><span class="status-indicator ${config.api_key_valid ? 'status-success' : 'status-error'}"></span>API Key</h4>
+                        <p>${config.api_key_valid ? '✅ Valid' : '❌ Invalid'}</p>
+                        <p>Key: ${config.api_key_masked}</p>
+                    </div>`;
+                    
+                    // Email Configuration
+                    html += `<div class="config-item">
+                        <h4><span class="status-indicator status-success"></span>From Email</h4>
+                        <p>${config.from_email}</p>
+                    </div>`;
+                    
+                    html += `<div class="config-item">
+                        <h4><span class="status-indicator status-success"></span>From Name</h4>
+                        <p>${config.from_name}</p>
+                    </div>`;
+                    
+                    html += `<div class="config-item">
+                        <h4><span class="status-indicator status-success"></span>Reply To</h4>
+                        <p>${config.reply_to}</p>
+                    </div>`;
+                    
+                    html += `<div class="config-item">
+                        <h4><span class="status-indicator status-success"></span>Brand ID</h4>
+                        <p>${config.brand_id}</p>
+                    </div>`;
+                    
+                    if (config.api_response) {
+                        html += `<div class="config-item">
+                            <h4>API Response</h4>
+                            <p style="font-size: 11px; color: #999;">${config.api_response}</p>
+                        </div>`;
+                    }
+                } else {
+                    html += `<div class="config-item">
+                        <h4><span class="status-indicator status-error"></span>Configuration Error</h4>
+                        <p>${data.error || 'Unknown error'}</p>
+                    </div>`;
+                }
+                
+                html += '</div>';
+                configDiv.innerHTML = html;
+                
+            } catch (error) {
+                configDiv.innerHTML = `<div class="config-item">
+                    <h4><span class="status-indicator status-error"></span>Connection Error</h4>
+                    <p>${error.message}</p>
+                </div>`;
+            }
+        }
+        
+        async function sendDirectTest() {
+            const email = document.getElementById('test-email').value;
+            const subject = document.getElementById('test-subject').value;
+            const body = document.getElementById('test-body').value;
+            
+            if (!email) {
+                alert('Please enter an email address');
+                return;
+            }
+            
+            showLoading(true);
+            
+            try {
+                const response = await fetch('/send-direct-test', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        subject: subject,
+                        body: body
+                    })
+                });
+                
+                const data = await response.json();
+                
+                addToHistory('Direct Test', email, data.success, data.message || data.error);
+                showResults('Direct Test', data);
+                
+            } catch (error) {
+                addToHistory('Direct Test', email, false, error.message);
+                showResults('Direct Test', { success: false, error: error.message });
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        async function sendCampaignTest() {
+            const email = document.getElementById('campaign-email').value;
+            const subject = document.getElementById('campaign-subject').value;
+            const body = document.getElementById('campaign-body').value;
+            
+            if (!email) {
+                alert('Please enter an email address');
+                return;
+            }
+            
+            showLoading(true);
+            
+            try {
+                // Create a simple campaign content
+                const content = {
+                    subject_line: subject,
+                    hero_title: 'TEST',
+                    greeting: 'Hello Bey!',
+                    main_content: body,
+                    cta_text: 'LEARN MORE',
+                    cta_url: 'https://kemis.net',
+                    urgency_text: 'Test email',
+                    offer_details: 'This is a test campaign'
+                };
+                
+                // Create minimal HTML template
+                const html_template = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>${subject}</title>
+                    </head>
+                    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                            <h2 style="color: #00CED1;">${content.hero_title}</h2>
+                            <p>${content.greeting}</p>
+                            <p>${content.main_content}</p>
+                            <div style="text-align: center; margin: 20px 0;">
+                                <a href="${content.cta_url}" style="background: #00CED1; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">${content.cta_text}</a>
+                            </div>
+                        </div>
+                    </body>
+                    </html>
+                `;
+                
+                const response = await fetch('/send-test-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        emails: email,
+                        html_template: html_template,
+                        content: content
+                    })
+                });
+                
+                const data = await response.json();
+                
+                addToHistory('Campaign Test', email, data.success, data.message || data.error);
+                showResults('Campaign Test', data);
+                
+            } catch (error) {
+                addToHistory('Campaign Test', email, false, error.message);
+                showResults('Campaign Test', { success: false, error: error.message });
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            loading.style.display = show ? 'block' : 'none';
+        }
+        
+        function showResults(testType, data) {
+            const resultsDiv = document.getElementById('results');
+            const resultsContent = document.getElementById('results-content');
+            
+            let html = `<div class="result-item ${data.success ? 'success' : 'error'}">
+                <h4>${testType} - ${data.success ? 'Success' : 'Failed'}</h4>
+                <p>${data.message || data.error || 'No message provided'}</p>
+            </div>`;
+            
+            if (data.sendy_response) {
+                html += `<div class="result-item">
+                    <h4>Sendy Response</h4>
+                    <p>${data.sendy_response}</p>
+                </div>`;
+            }
+            
+            if (data.campaign_name) {
+                html += `<div class="result-item">
+                    <h4>Campaign Name</h4>
+                    <p>${data.campaign_name}</p>
+                </div>`;
+            }
+            
+            resultsContent.innerHTML = html;
+            resultsDiv.style.display = 'block';
+        }
+        
+        function addToHistory(testType, email, success, message) {
+            const timestamp = new Date().toLocaleString();
+            const historyItem = {
+                timestamp,
+                testType,
+                email,
+                success,
+                message
+            };
+            
+            testHistory.unshift(historyItem);
+            updateHistoryDisplay();
+        }
+        
+        function updateHistoryDisplay() {
+            const historyContent = document.getElementById('test-history-content');
+            
+            if (testHistory.length === 0) {
+                historyContent.innerHTML = '<p style="color: #666; font-style: italic;">No tests performed yet.</p>';
+                return;
+            }
+            
+            let html = '';
+            testHistory.slice(0, 10).forEach(item => {
+                html += `<div class="history-item ${item.success ? 'success' : 'error'}">
+                    <div class="history-timestamp">${item.timestamp}</div>
+                    <h4>${item.testType} - ${item.email}</h4>
+                    <p>${item.message}</p>
+                </div>`;
+            });
+            
+            historyContent.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

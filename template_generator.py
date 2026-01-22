@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import requests
 from datetime import datetime
 import openai
@@ -18,7 +19,7 @@ app = Flask(__name__)
 # Configuration
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', 'your-openai-key-here')
 DALLE_API_KEY = os.getenv('DALLE_API_KEY', 'your-dalle-key-here')
-SENDY_API_KEY = 'WEbCbmHWj7N774gWVVsD'
+SENDY_API_KEY = os.getenv('SENDY_API_KEY', '')
 
 # Template structure
 KEMISEMIL_TEMPLATE = {
@@ -36,6 +37,8 @@ KEMISEMIL_TEMPLATE = {
 
 class TemplateGenerator:
     def __init__(self):
+        if not OPENAI_API_KEY or OPENAI_API_KEY == 'your-openai-key-here':
+            raise ValueError("OPENAI_API_KEY environment variable is required")
         self.openai_client = openai.OpenAI(api_key=OPENAI_API_KEY)
         
     def generate_email_content(self, prompt):
@@ -251,8 +254,22 @@ class TemplateGenerator:
             "offer_details": "Don't miss out!"
         }
     
-    def send_to_sendy(self, content, html_template, filename):
-        """Send template to Sendy API"""
+    def send_to_sendy(self, content, html_template, filename, list_ids=None, send_option='draft', scheduled_datetime=None):
+        """Send template to Sendy API
+        
+        Args:
+            content: Email content dictionary
+            html_template: HTML template string
+            filename: Template filename
+            list_ids: Comma-separated list IDs (defaults to hardcoded lists)
+            send_option: 'draft', 'send_now', or 'schedule'
+            scheduled_datetime: Unix timestamp for scheduled send (required if send_option='schedule')
+        """
+        if not SENDY_API_KEY:
+            return {
+                'success': False,
+                'error': 'SENDY_API_KEY environment variable is not set'
+            }
         try:
             # First, test if Sendy is accessible
             test_url = "https://kemis.net/sendy/"
@@ -288,7 +305,6 @@ class TemplateGenerator:
             ]
             
             # Generate campaign name from subject line + date
-            from datetime import datetime
             now = datetime.now()
             date_only = now.strftime("%m-%d-%Y")  # MM-DD-YYYY only
             subject_part = content['subject_line'][:30]  # First 30 chars of subject
@@ -346,6 +362,41 @@ class TemplateGenerator:
             
             plain_text = '\n'.join(plain_text_parts)
             
+            # Use provided list_ids or default to hardcoded ones
+            if not list_ids:
+                list_ids = 'DU0p7BsJdnwE0MXNZusbMQ,fO6BdhtVFBdzyQBMcG6Yiw'
+            
+            # Determine send_campaign value and schedule_date_time based on send_option
+                # Format datetime for Sendy API (requires "Month Day, Year h:mmam/pm" format)
+                schedule_date_time_str = None
+                if send_option == 'send_now':
+                    send_campaign_value = '1'
+                elif send_option == 'schedule' and scheduled_datetime:
+                    # Convert Unix timestamp to datetime object
+                    schedule_dt = datetime.fromtimestamp(int(scheduled_datetime))
+                    
+                    # Round minutes to nearest 5-minute increment (Sendy requirement)
+                    minutes = schedule_dt.minute
+                    rounded_minutes = round(minutes / 5) * 5
+                    if rounded_minutes == 60:
+                        rounded_minutes = 0
+                        schedule_dt = schedule_dt.replace(hour=schedule_dt.hour + 1, minute=0)
+                    else:
+                        schedule_dt = schedule_dt.replace(minute=rounded_minutes)
+                    
+                    # Format as "Month Day, Year h:mmam/pm" (e.g., "June 15, 2021 6:05pm")
+                    # Use %-d on Linux/Mac or %#d on Windows to remove leading zero, but for compatibility use manual replacement
+                schedule_date_time_str = schedule_dt.strftime("%B %d, %Y %I:%M%p").lower()
+                # Remove leading zero from day if present (e.g., "June 05, 2021" -> "June 5, 2021")
+                schedule_date_time_str = re.sub(r'(\w+)\s+0(\d),', r'\1 \2,', schedule_date_time_str)
+                # Remove leading zero from hour if present (e.g., "06:05pm" -> "6:05pm")
+                schedule_date_time_str = re.sub(r'(\s)0(\d:\d{2}[ap]m)', r'\1\2', schedule_date_time_str)
+                
+                # Set send_campaign to '1' for scheduled campaigns (Sendy requirement: send_campaign=1 + schedule_date_time = scheduled send)
+                send_campaign_value = '1'
+            else:
+                send_campaign_value = '0'  # Draft
+            
             # Prepare campaign data according to Sendy API documentation
             campaign_data = {
                 'api_key': SENDY_API_KEY,
@@ -357,9 +408,13 @@ class TemplateGenerator:
                 'subject': content['subject_line'],
                 'html_text': html_template,
                 'plain_text': plain_text,
-                'list_ids': 'DU0p7BsJdnwE0MXNZusbMQ,fO6BdhtVFBdzyQBMcG6Yiw',  # Your list IDs
-                'send_campaign': '0'  # Set to '0' for draft, '1' to send immediately
+                'list_ids': list_ids,
+                'send_campaign': send_campaign_value
             }
+            
+            # Add schedule_date_time parameter if scheduling
+            if schedule_date_time_str:
+                campaign_data['schedule_date_time'] = schedule_date_time_str
             
             # Try each endpoint with different configurations
             test_configs = [
@@ -421,7 +476,7 @@ class TemplateGenerator:
   -d "from_name=KemisEmail" \\
   -d "from_email=offers@kemis.net" \\
   -d "reply_to=offers@kemis.net" \\
-  -d "title=Test Campaign - {date_time}" \\
+  -d "title=Test Campaign - {now.strftime('%m-%d-%Y %H:%M')}" \\
   -d "subject=Test Subject" \\
   -d "html_text=<b>Hello</b>" \\
   -d "plain_text=Hello" \\
@@ -461,8 +516,14 @@ class TemplateGenerator:
                 'error': f'Error sending to Sendy: {str(e)}'
             }
     
-    def create_html_template(self, content, image_data=None):
+    def create_html_template(self, content, images=None):
         """Create the full HTML email template with original formatting"""
+        
+        # Ensure images is a list
+        if images is None:
+            images = []
+        elif not isinstance(images, list):
+            images = [images]
         
         # Determine hero title color based on content
         hero_color = "#00CED1"  # Default turquoise
@@ -626,7 +687,7 @@ class TemplateGenerator:
 													<tbody>
 														<tr>
 															<td align="center" style="padding:0;Margin:0;font-size:0px">
-																{self._get_image_html(image_data, content['subject_line'], content['cta_url'])}
+																{self._get_images_html(images, content['subject_line'], content['cta_url'])}
 															</td>
 														</tr>
 														<tr class="r">
@@ -666,7 +727,7 @@ class TemplateGenerator:
 														</tr>
 														<tr>
 															<td align="center" class="f br bs" style="Margin:0;padding-right:20px;padding-left:20px;padding-bottom:20px;padding-top:10px">
-															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:24px;letter-spacing:0;color:#333333;font-size:16px;text-align:center">{content.get('offer_details', 'Don\'t miss out on this incredible opportunity!')}</p>
+															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:24px;letter-spacing:0;color:#333333;font-size:16px;text-align:center">{content.get('offer_details', "Don't miss out on this incredible opportunity!")}</p>
 															</td>
 														</tr>
 														<tr>
@@ -692,74 +753,72 @@ class TemplateGenerator:
 				</tbody>
 			</table>
 
-			<table align="center" cellpadding="0" cellspacing="0" class="v" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;width:100%;table-layout:fixed !important;background-color:transparent;background-repeat:repeat;background-position:center top">
+			<table align="center" cellpadding="0" cellspacing="0" class="t" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;width:100%;table-layout:fixed !important">
 				<tbody>
 					<tr>
 						<td align="center" style="padding:0;Margin:0">
-						<table align="center" cellpadding="0" cellspacing="0" class="bl" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;background-color:transparent;width:640px">
+						<table align="center" bgcolor="#f8f9fa" cellpadding="0" cellspacing="0" class="bm" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;background-color:#f8f9fa;width:600px;max-width:100%">
 							<tbody>
 								<tr>
-									<td align="left" style="padding:20px;Margin:0">
+									<td align="center" class="mobile-padding" style="Margin:0;padding-top:30px;padding-right:20px;padding-bottom:30px;padding-left:20px">
 									<table cellpadding="0" cellspacing="0" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
 										<tbody>
 											<tr>
-												<td align="left" style="padding:0;Margin:0;width:560px">
+												<td align="center" style="padding:0;Margin:0;width:560px" valign="top">
 												<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
 													<tbody>
 														<tr>
-															<td align="center" class="bq" style="padding:0;Margin:0;padding-left:30px;padding-top:15px;padding-bottom:15px;font-size:0">
-															<table cellpadding="0" cellspacing="0" class="n bb" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px">
+															<td align="center" class="bk" style="padding:0;Margin:0">
+															<h3 style="Margin:0;font-family:arial, 'helvetica neue', helvetica, sans-serif;mso-line-height-rule:exactly;letter-spacing:0;font-size:18px;font-style:normal;font-weight:bold;line-height:22px;color:#00CED1">
+																KemisEmail – Delivering Local Deals and Offers Since 2005
+															</h3>
+															</td>
+														</tr>
+														<tr>
+															<td align="center" class="bk" style="padding:0;Margin:0;padding-top:20px">
+															<p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;font-size:12px;font-style:normal;font-weight:normal;color:#666666">
+																2025 © Kemis Group of Companies Inc. All rights reserved.
+															</p>
+															</td>
+														</tr>
+														<tr>
+															<td align="center" class="bk" style="padding:0;Margin:0;padding-top:10px">
+															<p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;font-size:12px;font-style:normal;font-weight:normal;color:#666666">
+																Nassau West, New Providence, The Bahamas
+															</p>
+															</td>
+														</tr>
+														<tr>
+															<td align="center" class="bk" style="padding:0;Margin:0;padding-top:20px">
+															<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
 																<tbody>
 																	<tr>
-																		<td align="center" class="bp" style="padding:0;Margin:0;padding-right:28px" valign="top"><a href="https://www.kemis.net" style="mso-line-height-rule:exactly;text-decoration:underline;color:#333333;font-size:12px" target="_blank"><img alt="Website" height="26" src="https://frhuwic.stripocdn.email/content/assets/img/other-icons/logo-black/link-logo-black.png" style="display: block; font-size: 14px; border: 0px; outline: none; text-decoration: none; width: 26px; height: 26px;" title="Website" width="26" /></a>
-
-																		<p style="text-align: center;">&nbsp;</p>
+																		<td align="center" style="padding:0;Margin:0;padding-right:15px">
+																		<a href="https://dzvs3n3sqle.typeform.com/to/JxCYlnLb" style="text-decoration:none;color:#00CED1;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:normal;">Sign Up</a>
 																		</td>
-																		<td align="center" class="bp" style="padding:0;Margin:0;padding-right:28px" valign="top"><a href="https://bs.linkedin.com/company/kemisdigital" style="mso-line-height-rule:exactly;text-decoration:underline;color:#333333;font-size:12px" target="_blank"><img alt="In" height="26" src="https://frhuwic.stripocdn.email/content/assets/img/social-icons/logo-black/linkedin-logo-black.png" style="display:block;font-size:14px;border:0;outline:none;text-decoration:none" title="LinkedIn" width="26" /></a></td>
-																		<td align="center" class="bp" style="padding:0;Margin:0;padding-right:28px" valign="top"><a href="https://www.facebook.com/kemis.net" style="mso-line-height-rule:exactly;text-decoration:underline;color:#333333;font-size:12px" target="_blank"><img alt="Fb" height="26" src="https://frhuwic.stripocdn.email/content/assets/img/social-icons/logo-black/facebook-logo-black.png" style="display:block;font-size:14px;border:0;outline:none;text-decoration:none" title="Facebook" width="26" /></a></td>
-																		<td align="center" style="padding:0;Margin:0" valign="top"><a href="https://www.youtube.com/@kemisdigital" style="mso-line-height-rule:exactly;text-decoration:underline;color:#333333;font-size:12px" target="_blank"><img alt="Yt" height="26" src="https://frhuwic.stripocdn.email/content/assets/img/social-icons/logo-black/youtube-logo-black.png" style="display:block;font-size:14px;border:0;outline:none;text-decoration:none" title="YouTube" width="26" /></a></td>
+																		<td align="center" style="padding:0;Margin:0;padding-right:15px">
+																		<a href="https://kemisdigital.com/policies/refund-policy" style="text-decoration:none;color:#666666;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:normal;">Privacy Policy</a>
+																		</td>
+																		<td align="center" style="padding:0;Margin:0">
+																		<a href="https://kemisdigital.com/policies/terms-of-service" style="text-decoration:none;color:#666666;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:normal;">Terms of Use</a>
+																		</td>
 																	</tr>
 																</tbody>
 															</table>
 															</td>
 														</tr>
-														<tr class="r">
-															<td align="center" class="a" style="padding:0;Margin:0;padding-bottom:35px">
-															<p class="b" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px"><strong>KemisEmail</strong> – Delivering Local Deals and Offers Since 2005</p>
-
-															<p class="b" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">2025 &copy; Kemis Group of Companies Inc. All rights reserved.</p>
-
-															<p class="b" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">Nassau West, New Providence, The Bahamas</p>
-															</td>
-														</tr>
-														<!--[if !mso]><!-- -->
-														<tr class="q" style="display:none;float:left;overflow:hidden;width:0;max-height:0;line-height:0;mso-hide:all">
-															<td align="center" class="l" style="padding:0;Margin:0;padding-bottom:35px">
-															<p class="e m" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;color:#333333;font-size:12px"><strong>KemisEmail</strong> – Delivering Local Deals and Offers Since 2005</p>
-
-															<p class="e m" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;color:#333333;font-size:12px">2025 &copy; Kemis Group of Companies Inc. All rights reserved.</p>
-
-															<p class="e m" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;color:#333333;font-size:12px">Nassau West, New Providence, The Bahamas</p>
-															</td>
-														</tr>
-														<!--<![endif]-->
 														<tr>
-															<td style="padding:0;Margin:0">
-															<table cellpadding="0" cellspacing="0" class="o" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
-																<tbody>
-																	<tr class="links">
-																		<td align="center" style="Margin:0;border:0;padding-bottom:5px;padding-top:5px;padding-right:5px;padding-left:5px" valign="top" width="33.33%">
-																		<div style="vertical-align:middle;display:block"><a href="https://dzvs3n3sqle.typeform.com/to/JxCYlnLb" style="mso-line-height-rule:exactly;text-decoration:none;font-family:arial, 'helvetica neue', helvetica, sans-serif;display:block;color:#999999;font-size:12px" target="_blank">Sign Up</a></div>
-																		</td>
-																		<td align="center" style="Margin:0;border:0;padding-bottom:5px;padding-top:5px;padding-right:5px;padding-left:5px;border-left:1px solid #cccccc" valign="top" width="33.33%">
-																		<div style="vertical-align:middle;display:block"><a href="https://kemisdigital.com/policies/refund-policy" style="mso-line-height-rule:exactly;text-decoration:none;font-family:arial, 'helvetica neue', helvetica, sans-serif;display:block;color:#999999;font-size:12px" target="_blank">Privacy Policy</a></div>
-																		</td>
-																		<td align="center" style="Margin:0;border:0;padding-bottom:5px;padding-top:5px;padding-right:5px;padding-left:5px;border-left:1px solid #cccccc" valign="top" width="33.33%">
-																		<div style="vertical-align:middle;display:block"><a href="https://kemisdigital.com/policies/terms-of-service" style="mso-line-height-rule:exactly;text-decoration:none;font-family:arial, 'helvetica neue', helvetica, sans-serif;display:block;color:#999999;font-size:12px" target="_blank">Terms of Use</a></div>
-																		</td>
-																	</tr>
-																</tbody>
-															</table>
+															<td align="center" class="bk" style="padding:0;Margin:0;padding-top:20px">
+															<p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;font-size:12px;font-style:normal;font-weight:normal;color:#666666">
+																You are receiving this because you signed up for our Deals and Offers list.
+															</p>
+															</td>
+														</tr>
+														<tr>
+															<td align="center" class="bk" style="padding:0;Margin:0;padding-top:10px">
+															<p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;font-size:12px;font-style:normal;font-weight:normal;color:#666666">
+																Click here to <a href="[unsubscribe]" style="color:#666666;text-decoration:underline;">unsubscribe</a> if this is no longer of interest.
+															</p>
 															</td>
 														</tr>
 													</tbody>
@@ -819,18 +878,31 @@ class TemplateGenerator:
         
         return html_template
     
-    def _get_image_html(self, image_data, alt_text, cta_url=None):
-        """Generate the image HTML with proper styling and optional CTA link"""
-        if image_data:
-            if cta_url:
-                return f'<a href="{cta_url}" target="_blank" style="text-decoration: none;"><img alt="{alt_text}" class="adapt-img" src="{image_data}" style="display: block; font-size: 14px; border: 0px; outline: none; text-decoration: none; border-radius: 15px; width: 560px; height: auto;" title="{alt_text}" /></a>'
-            else:
-                return f'<img alt="{alt_text}" class="adapt-img" src="{image_data}" style="display: block; font-size: 14px; border: 0px; outline: none; text-decoration: none; border-radius: 15px; width: 560px; height: auto;" title="{alt_text}" />'
-        else:
+    def _get_images_html(self, images, alt_text, cta_url=None):
+        """Generate HTML for one or more images stacked vertically
+        Images can be either HTTP URLs or base64 data URIs
+        """
+        if not images or len(images) == 0:
+            # No images - show placeholder
             if cta_url:
                 return f'<a href="{cta_url}" target="_blank" style="text-decoration: none;"><div style="display: block; font-size: 14px; border: 0px; outline: none; text-decoration: none; border-radius: 15px; width: 560px; height: 400px; background: linear-gradient(135deg, #00CED1 0%, #FFD700 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold;">{alt_text}</div></a>'
             else:
                 return f'<div style="display: block; font-size: 14px; border: 0px; outline: none; text-decoration: none; border-radius: 15px; width: 560px; height: 400px; background: linear-gradient(135deg, #00CED1 0%, #FFD700 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold;">{alt_text}</div>'
+        
+        html_parts = []
+        for idx, image_src in enumerate(images):
+            if image_src:
+                # image_src can be either a URL (http/https) or base64 data URI
+                # Add spacing between images (except for first image)
+                spacing = '' if idx == 0 else '<div style="height: 15px;"></div>'
+                
+                if cta_url:
+                    img_html = f'{spacing}<a href="{cta_url}" target="_blank" style="text-decoration: none;"><img alt="{alt_text}" class="adapt-img" src="{image_src}" style="display: block; font-size: 14px; border: 0px; outline: none; text-decoration: none; border-radius: 15px; width: 560px; height: auto;" title="{alt_text}" /></a>'
+                else:
+                    img_html = f'{spacing}<img alt="{alt_text}" class="adapt-img" src="{image_src}" style="display: block; font-size: 14px; border: 0px; outline: none; text-decoration: none; border-radius: 15px; width: 560px; height: auto;" title="{alt_text}" />'
+                html_parts.append(img_html)
+        
+        return ''.join(html_parts)
 
 # Initialize the generator
 generator = TemplateGenerator()
@@ -838,6 +910,109 @@ generator = TemplateGenerator()
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/test-lists')
+def test_lists():
+    return render_template('test_lists.html')
+
+@app.route('/get-sendy-lists', methods=['GET'])
+def get_sendy_lists():
+    """Fetch available lists from Sendy API"""
+    try:
+        sendy_url = "https://kemis.net/sendy/api/lists/get-lists.php"
+        
+        data = {
+            'api_key': SENDY_API_KEY,
+            'brand_id': '1',  # Your brand ID
+            'include_hidden': 'no'  # Optional: set to 'yes' to include hidden lists
+        }
+        
+        print(f"📋 Fetching lists from Sendy API: {sendy_url}")
+        print(f"📋 Request data: {data}")
+        
+        # Add headers to match the working campaign creation config
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'User-Agent': 'KemisEmail/1.0',
+            'Accept': '*/*'
+        }
+        
+        response = requests.post(sendy_url, data=data, headers=headers, timeout=10)
+        print(f"📋 Sendy lists API response status: {response.status_code}")
+        print(f"📋 Response text: {response.text[:200]}")
+        
+        if response.status_code == 200:
+            # Sendy returns lists as an object with keys like list1, list2, etc.
+            try:
+                lists_obj = response.json()
+                print(f"📋 Parsed JSON response, found {len(lists_obj)} list keys")
+                
+                # Only show these specific lists
+                allowed_list_ids = [
+                    'fO6BdhtVFBdzyQBMcG6Yiw',  # 🔥 Engaged Core – Bahamas (Openers)
+                    'zjr2Pf3Pg892uheH0tbyqbOg'  # Clients
+                ]
+                
+                # Convert the object format to an array and filter
+                lists_array = []
+                for key, value in lists_obj.items():
+                    if isinstance(value, dict) and 'id' in value and 'name' in value:
+                        if value['id'] in allowed_list_ids:
+                            lists_array.append({
+                                'id': value['id'],
+                                'name': value['name']
+                            })
+                
+                print(f"📋 Successfully converted to array: {len(lists_array)} lists (filtered)")
+                return jsonify({
+                    'success': True,
+                    'lists': lists_array
+                })
+            except Exception as e:
+                print(f"❌ Error parsing Sendy lists response: {e}")
+                print(f"📋 Raw response text: {response.text[:500]}")
+                # If not JSON, try parsing as plain text (some Sendy versions return different formats)
+                return jsonify({
+                    'success': False,
+                    'error': f'Failed to parse lists response: {str(e)}',
+                    'raw_response': response.text
+                })
+        else:
+            return jsonify({
+                'success': False,
+                'error': f'Sendy API returned status {response.status_code}'
+            }), response.status_code
+            
+    except requests.exceptions.Timeout:
+        return jsonify({
+            'success': False,
+            'error': 'Sendy API timeout'
+        }), 504
+    except requests.exceptions.ConnectionError:
+        return jsonify({
+            'success': False,
+            'error': 'Could not connect to Sendy'
+        }), 503
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Error fetching lists: {str(e)}'
+        }), 500
+
+@app.route('/images/<filename>')
+def serve_image(filename):
+    """Serve images from the images folder"""
+    try:
+        from flask import send_from_directory
+        import os
+        # Security: prevent directory traversal
+        filename = os.path.basename(filename)
+        if not os.path.exists(os.path.join('images', filename)):
+            return jsonify({'error': 'Image not found'}), 404
+        return send_from_directory('images', filename)
+    except Exception as e:
+        print(f"Error serving image {filename}: {e}")
+        return jsonify({'error': str(e)}), 404
 
 @app.route('/generate', methods=['POST'])
 def generate_template():
@@ -868,64 +1043,85 @@ def generate_template():
         
         # Handle image based on option
         image_data = None
+        image_data2 = None
         image_prompt = None
         image_source = "AI Generated"
         
         if image_option == 'ai':
-            # Generate image prompt and image
+            # Generate image prompt and image (will be base64)
             image_prompt = generator.generate_image_prompt(content)
             image_data = generator.generate_image(image_prompt)
             image_source = "AI Generated"
+            # AI images will be converted to URLs in the saving step below
         elif image_option == 'upload':
-            # Use uploaded image
+            # Use uploaded images (one or two)
             if 'uploadedImage' in request.form:
                 image_data = request.form['uploadedImage']
                 image_source = "Uploaded"
             else:
                 return jsonify({'error': 'No image uploaded'}), 400
+            
+            # Check for second image (optional)
+            if 'uploadedImage2' in request.form:
+                image_data2 = request.form['uploadedImage2']
+                image_source = "Uploaded (2 images)"
         elif image_option == 'none':
             # No image
             image_source = "None"
         
-        # Create HTML template
-        html_template = generator.create_html_template(content, image_data)
-        
         # Create campaign name from subject line
-        import re
         campaign_name = re.sub(r'[^a-zA-Z0-9\s-]', '', content['subject_line'])
         campaign_name = re.sub(r'\s+', '-', campaign_name.strip())
         campaign_name = campaign_name[:50]  # Limit length
         
         # Save template to templates folder
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        template_filename = f"templates/{campaign_name}_{timestamp}.html"
         
-        # Ensure templates directory exists
-        import os
+        # Ensure directories exist
         os.makedirs('templates', exist_ok=True)
+        os.makedirs('images', exist_ok=True)
+        
+        # Save images and generate public URLs
+        image_urls = []
+        for idx, img_data in enumerate([image_data, image_data2] if image_data2 else ([image_data] if image_data else [])):
+            if img_data and img_data.startswith('data:image'):
+                import base64
+                try:
+                    # Extract image data from base64
+                    image_format = img_data.split(';')[0].split('/')[1]
+                    image_data_clean = img_data.split(',')[1]
+                    image_bytes = base64.b64decode(image_data_clean)
+                    
+                    # Save to images folder
+                    suffix = f"_{idx+1}" if image_data2 else ""
+                    image_filename_only = f"{campaign_name}_{timestamp}{suffix}.{image_format}"
+                    image_filepath = f"images/{image_filename_only}"
+                    
+                    with open(image_filepath, 'wb') as f:
+                        f.write(image_bytes)
+                    
+                    # Generate public URL (use environment variable or relative path)
+                    base_url = os.getenv('BASE_URL', '')
+                    if base_url:
+                        public_url = f"{base_url.rstrip('/')}/images/{image_filename_only}"
+                    else:
+                        # Use relative path for local development
+                        public_url = f"/images/{image_filename_only}"
+                    image_urls.append(public_url)
+                    
+                    print(f"💾 Saved image {idx+1}: {image_filepath}")
+                    print(f"🔗 Public URL: {public_url}")
+                except Exception as e:
+                    print(f"⚠️ Could not save image {idx+1}: {e}")
+        
+        # Create HTML template with image URLs (not base64)
+        html_template = generator.create_html_template(content, image_urls)
+        
+        # Save template to templates folder
+        template_filename = f"templates/{campaign_name}_{timestamp}.html"
         
         with open(template_filename, 'w', encoding='utf-8') as f:
             f.write(html_template)
-        
-        # Save image to images folder if it's base64 data
-        if image_data and image_data.startswith('data:image'):
-            import base64
-            try:
-                # Extract image data from base64
-                image_format = image_data.split(';')[0].split('/')[1]
-                image_data_clean = image_data.split(',')[1]
-                image_bytes = base64.b64decode(image_data_clean)
-                
-                # Save to images folder
-                os.makedirs('images', exist_ok=True)
-                image_filename = f"images/{campaign_name}_{timestamp}.{image_format}"
-                
-                with open(image_filename, 'wb') as f:
-                    f.write(image_bytes)
-                
-                print(f"💾 Saved image: {image_filename}")
-            except Exception as e:
-                print(f"⚠️ Could not save image: {e}")
         
         filename = template_filename
         
@@ -938,7 +1134,6 @@ def generate_template():
             print(f"⚠️ Large template detected: {html_size:,} bytes, compressing...")
             
             # Try to compress by removing large base64 images
-            import re
             base64_pattern = r'data:image/[^;]+;base64,[A-Za-z0-9+/=]{1000,}'
             compressed_html = re.sub(base64_pattern, 'data:image/jpeg;base64,PLACEHOLDER_IMAGE_REMOVED', html_template)
             
@@ -957,17 +1152,13 @@ def generate_template():
                 html_template = compressed_html
                 print(f"✅ Template compressed successfully")
         
-        # Check if image data is too large (limit to 500KB for response)
-        if image_data and len(image_data.encode('utf-8')) > 500 * 1024:
-            print("⚠️ Image data too large for response, removing...")
-            image_data = None
-            image_source = "Removed (too large for response)"
-        
+        # Return the image URLs for preview
         return jsonify({
             'success': True,
             'content': content,
             'image_prompt': image_prompt,
-            'image_data': image_data,
+            'image_data': image_urls[0] if image_urls else None,  # Return URL instead of base64
+            'image_urls': image_urls,  # Return all URLs
             'image_source': image_source,
             'html_template': html_template,
             'filename': filename,
@@ -989,6 +1180,299 @@ def download_template(filename):
     except Exception as e:
         return jsonify({'error': str(e)}), 404
 
+@app.route('/regenerate-preview', methods=['POST'])
+def regenerate_preview():
+    """Regenerate HTML template with edited content"""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        content = data.get('content', {})
+        image_urls = data.get('image_urls', [])
+        
+        if not content:
+            return jsonify({'error': 'Missing content'}), 400
+        
+        # Regenerate HTML template with updated content
+        html_template = generator.create_html_template(content, image_urls)
+        
+        return jsonify({
+            'success': True,
+            'html_template': html_template
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/send-test-email', methods=['POST'])
+def send_test_email():
+    """Send test email directly to specified email address only"""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        emails = data.get('emails', '')
+        html_template = data.get('html_template', '')
+        content = data.get('content', {})
+        
+        if not emails or not html_template:
+            return jsonify({'error': 'Missing emails or HTML template'}), 400
+        
+        # Validate email format
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, emails):
+            return jsonify({'error': 'Invalid email address format'}), 400
+        
+        # Create a test campaign and send immediately to the specific email only
+        sendy_url = "https://kemis.net/sendy/api/campaigns/create.php"
+        
+        # Generate test campaign name
+        now = datetime.now()
+        test_campaign_name = f"TEST - {content.get('subject_line', 'Test Email')} - {now.strftime('%m-%d-%Y %H:%M')}"
+        
+        # Create plain text version
+        plain_text = f"""
+{content.get('subject_line', 'Test Email')}
+
+{content.get('greeting', 'Hello')}
+
+{content.get('main_content', '')}
+
+{content.get('cta_text', '')}
+{content.get('cta_url', '')}
+
+{content.get('offer_details', '')}
+{content.get('urgency_text', '')}
+
+---
+This is a test email from KemisEmail Template Creator.
+        """.strip()
+        
+        # Prepare campaign data for test send - using direct email sending
+        test_data = {
+            'api_key': SENDY_API_KEY,
+            'brand_id': '1',
+            'from_name': 'KemisEmail (Test)',
+            'from_email': 'offers@kemis.net',
+            'reply_to': 'offers@kemis.net',
+            'title': test_campaign_name,
+            'subject': f"[TEST] {content.get('subject_line', 'Test Email')}",
+            'html_text': html_template,
+            'plain_text': plain_text,
+            'list_ids': '',  # No list IDs for test emails
+            'send_campaign': '0',  # Don't send to lists
+            'test_email': emails  # Send directly to this email only
+        }
+        
+        # Add headers that work
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'User-Agent': 'KemisEmail/1.0',
+            'Accept': '*/*'
+        }
+        
+        print(f"📧 Creating test campaign for: {emails}")
+        print(f"📧 Test campaign name: {test_campaign_name}")
+        
+        response = requests.post(sendy_url, data=test_data, headers=headers, timeout=30)
+        print(f"📧 Test campaign response: {response.status_code} - {response.text[:200]}")
+        
+        if response.status_code == 200:
+            response_text = response.text.strip()
+            if 'campaign created' in response_text.lower() or 'sending' in response_text.lower():
+                return jsonify({
+                    'success': True,
+                    'message': f'Test email campaign created and sent to your list. Check your inbox!'
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': f'Sendy response: {response_text}'
+                })
+        else:
+            return jsonify({
+                'success': False,
+                'error': f'Sendy API returned status {response.status_code}'
+            }), response.status_code
+        
+    except Exception as e:
+        print(f"❌ Error sending test email: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/test-email')
+def test_email_page():
+    """Serve the email test page"""
+    return render_template('test_email.html')
+
+@app.route('/verify-email-config', methods=['GET'])
+def verify_email_config():
+    """Check Sendy configuration and connectivity"""
+    try:
+        config_info = {
+            'sendy_url': 'https://kemis.net/sendy/',
+            'api_key_masked': f"{SENDY_API_KEY[:8]}...",
+            'from_email': 'offers@kemis.net',
+            'from_name': 'KemisEmail',
+            'reply_to': 'offers@kemis.net',
+            'brand_id': '1'
+        }
+        
+        # Test Sendy connectivity
+        test_url = "https://kemis.net/sendy/"
+        try:
+            test_response = requests.get(test_url, timeout=10)
+            config_info['sendy_accessible'] = test_response.status_code == 200
+            config_info['sendy_status'] = test_response.status_code
+        except Exception as e:
+            config_info['sendy_accessible'] = False
+            config_info['sendy_error'] = str(e)
+        
+        # Test API key with a simple request
+        api_test_url = "https://kemis.net/sendy/api/subscribers.php"
+        api_test_data = {
+            'api_key': SENDY_API_KEY,
+            'list': 'DU0p7BsJdnwE0MXNZusbMQ'
+        }
+        
+        try:
+            api_response = requests.post(api_test_url, data=api_test_data, timeout=10)
+            config_info['api_key_valid'] = api_response.status_code == 200
+            config_info['api_response'] = api_response.text[:200]
+        except Exception as e:
+            config_info['api_key_valid'] = False
+            config_info['api_error'] = str(e)
+        
+        return jsonify({
+            'success': True,
+            'config': config_info
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/send-direct-test', methods=['POST'])
+def send_direct_test():
+    """Send a minimal test email directly via Sendy API"""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        test_email = data.get('email', '')
+        test_subject = data.get('subject', 'Test Email from KemisEmail')
+        test_body = data.get('body', 'This is a test email to verify email delivery.')
+        
+        if not test_email:
+            return jsonify({'error': 'Email address is required'}), 400
+        
+        # Validate email format
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, test_email):
+            return jsonify({'error': 'Invalid email address format'}), 400
+        
+        # Create minimal HTML template
+        minimal_html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>{test_subject}</title>
+        </head>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #00CED1;">🧪 Test Email</h2>
+                <p>{test_body}</p>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+                <p style="font-size: 12px; color: #666;">
+                    This is a test email from KemisEmail Template Generator.<br>
+                    Sent at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+                </p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # Create plain text version
+        plain_text = f"""
+{test_subject}
+
+{test_body}
+
+---
+This is a test email from KemisEmail Template Generator.
+Sent at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+        """.strip()
+        
+        # Generate test campaign name
+        now = datetime.now()
+        test_campaign_name = f"DIRECT TEST - {now.strftime('%m-%d-%Y %H:%M')}"
+        
+        # Prepare campaign data for direct test - send only to specified email
+        test_data = {
+            'api_key': SENDY_API_KEY,
+            'brand_id': '1',
+            'from_name': 'KemisEmail (Test)',
+            'from_email': 'offers@kemis.net',
+            'reply_to': 'offers@kemis.net',
+            'title': test_campaign_name,
+            'subject': f"[TEST] {test_subject}",
+            'html_text': minimal_html,
+            'plain_text': plain_text,
+            'list_ids': '',  # No list IDs for test emails
+            'send_campaign': '0',  # Don't send to lists
+            'test_email': test_email  # Send directly to this email only
+        }
+        
+        # Add headers that work
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'User-Agent': 'KemisEmail/1.0',
+            'Accept': '*/*'
+        }
+        
+        sendy_url = "https://kemis.net/sendy/api/campaigns/create.php"
+        
+        print(f"📧 Sending direct test email to: {test_email}")
+        print(f"📧 Test campaign: {test_campaign_name}")
+        print(f"📧 Subject: {test_subject}")
+        
+        response = requests.post(sendy_url, data=test_data, headers=headers, timeout=30)
+        print(f"📧 Direct test response: {response.status_code} - {response.text[:200]}")
+        
+        if response.status_code == 200:
+            response_text = response.text.strip()
+            if 'campaign created' in response_text.lower() or 'sending' in response_text.lower():
+                return jsonify({
+                    'success': True,
+                    'message': f'Direct test email sent successfully! Check {test_email} for delivery.',
+                    'campaign_name': test_campaign_name,
+                    'sendy_response': response_text
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': f'Sendy response: {response_text}',
+                    'sendy_response': response_text
+                })
+        else:
+            return jsonify({
+                'success': False,
+                'error': f'Sendy API returned status {response.status_code}',
+                'response_text': response.text
+            }), response.status_code
+        
+    except Exception as e:
+        print(f"❌ Error sending direct test email: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/send-to-sendy', methods=['POST'])
 def send_to_sendy():
     try:
@@ -1001,9 +1485,15 @@ def send_to_sendy():
         content = data.get('content', {})
         html_template = data.get('html_template', '')
         filename = data.get('filename', '')
+        list_ids = data.get('list_ids', '')  # Comma-separated list IDs
+        send_option = data.get('send_option', 'draft')  # 'draft', 'send_now', or 'schedule'
+        scheduled_datetime = data.get('scheduled_datetime', None)  # Unix timestamp
         
         if not content or not html_template:
             return jsonify({'error': 'Missing content or HTML template'}), 400
+        
+        if not list_ids:
+            return jsonify({'error': 'Please select at least one mailing list'}), 400
         
         # Check if HTML template is too large (over 1MB)
         html_size = len(html_template.encode('utf-8'))
@@ -1011,7 +1501,6 @@ def send_to_sendy():
             print(f"📧 Large HTML template detected: {html_size:,} bytes")
             
             # Try to compress by removing large base64 images
-            import re
             # Find and replace large base64 images with placeholder
             base64_pattern = r'data:image/[^;]+;base64,[A-Za-z0-9+/=]{1000,}'
             compressed_html = re.sub(base64_pattern, 'data:image/jpeg;base64,PLACEHOLDER_IMAGE_REMOVED', html_template)
@@ -1026,7 +1515,14 @@ def send_to_sendy():
             html_template = compressed_html
         
         # Send to Sendy
-        result = generator.send_to_sendy(content, html_template, filename)
+        result = generator.send_to_sendy(
+            content, 
+            html_template, 
+            filename,
+            list_ids=list_ids,
+            send_option=send_option,
+            scheduled_datetime=scheduled_datetime
+        )
         
         return jsonify(result)
         
@@ -1034,4 +1530,6 @@ def send_to_sendy():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000) 
+    port = int(os.getenv('PORT', 5000))
+    debug = os.getenv('FLASK_ENV', 'production') != 'production'
+    app.run(debug=debug, host='0.0.0.0', port=port) 

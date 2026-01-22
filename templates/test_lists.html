@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sendy Lists Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            padding: 40px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #2c2c2c;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #00CED1;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            background: #00CED1;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        
+        .btn:hover {
+            background: #00B8B8;
+        }
+        
+        .result {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid #404040;
+            margin-top: 20px;
+        }
+        
+        .success {
+            color: #27ae60;
+        }
+        
+        .error {
+            color: #e74c3c;
+        }
+        
+        pre {
+            background: #000000;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin-top: 10px;
+            color: #00ff00;
+            font-size: 12px;
+        }
+        
+        .list-item {
+            background: #2c2c2c;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            border-left: 3px solid #00CED1;
+        }
+        
+        .loading {
+            display: none;
+            color: #00CED1;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #404040;
+            border-top-color: #00CED1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Sendy Lists API Test</h1>
+        <p style="color: #cccccc; margin-bottom: 20px;">
+            This test page will help debug the Sendy list fetching functionality.
+        </p>
+        
+        <button class="btn" onclick="testListFetch()">📡 Test List Fetch</button>
+        
+        <div class="loading" id="loading">
+            <span class="spinner"></span> Loading...
+        </div>
+        
+        <div id="results"></div>
+    </div>
+    
+    <script>
+        async function testListFetch() {
+            const resultsDiv = document.getElementById('results');
+            const loadingDiv = document.getElementById('loading');
+            
+            resultsDiv.innerHTML = '';
+            loadingDiv.style.display = 'block';
+            
+            try {
+                console.log('Fetching lists from /get-sendy-lists...');
+                
+                const response = await fetch('/get-sendy-lists');
+                const data = await response.json();
+                
+                loadingDiv.style.display = 'none';
+                
+                let html = '<div class="result">';
+                html += `<h3>Response Status: ${response.status}</h3>`;
+                html += `<p><strong>Success:</strong> ${data.success ? '✅ Yes' : '❌ No'}</p>`;
+                
+                if (data.success) {
+                    html += `<p class="success"><strong>Lists Found:</strong> ${data.lists ? data.lists.length : 0}</p>`;
+                    
+                    if (data.lists && data.lists.length > 0) {
+                        html += '<h4 style="margin-top: 20px;">📋 Lists:</h4>';
+                        data.lists.forEach((list, index) => {
+                            html += `<div class="list-item">
+                                <strong>${index + 1}. ${list.name}</strong><br>
+                                <small style="color: #999;">ID: ${list.id}</small>
+                            </div>`;
+                        });
+                    }
+                } else {
+                    html += `<p class="error"><strong>Error:</strong> ${data.error || 'Unknown error'}</p>`;
+                    
+                    if (data.raw_response) {
+                        html += '<h4 style="margin-top: 20px;">Raw Response:</h4>';
+                        html += `<pre>${escapeHtml(data.raw_response)}</pre>`;
+                    }
+                }
+                
+                html += '<h4 style="margin-top: 20px;">📦 Full JSON Response:</h4>';
+                html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                html += '</div>';
+                
+                resultsDiv.innerHTML = html;
+                
+                console.log('Response data:', data);
+                
+            } catch (error) {
+                loadingDiv.style.display = 'none';
+                
+                resultsDiv.innerHTML = `
+                    <div class="result">
+                        <h3 class="error">❌ Network Error</h3>
+                        <p>${error.message}</p>
+                        <pre>${error.stack}</pre>
+                    </div>
+                `;
+                
+                console.error('Error:', error);
+            }
+        }
+        
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+        
+        // Auto-run test on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Page loaded, running initial test...');
+            testListFetch();
+        });
+    </script>
+</body>
+</html>
+

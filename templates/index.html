@@ -157,65 +157,6 @@
             display: none;
         }
         
-        /* Image Resizer Styles */
-        .resizer-controls {
-            background: #1a1a1a;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 15px;
-            border: 1px solid #404040;
-        }
-        
-        .resizer-controls label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #ffffff;
-        }
-        
-        .resizer-controls input[type="range"] {
-            width: 100%;
-            margin-bottom: 15px;
-            height: 6px;
-            border-radius: 3px;
-            background: #ddd;
-            outline: none;
-            -webkit-appearance: none;
-        }
-        
-        .resizer-controls input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #00CED1;
-            cursor: pointer;
-        }
-        
-        .resizer-controls input[type="range"]::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #00CED1;
-            cursor: pointer;
-            border: none;
-        }
-        
-        .resizer-info {
-            background: #2c2c2c;
-            padding: 15px;
-            border-radius: 6px;
-            margin: 15px 0;
-            border-left: 4px solid #3498db;
-        }
-        
-        .resizer-info p {
-            margin: 5px 0;
-            font-size: 14px;
-            color: #cccccc;
-        }
-        
         .btn {
             padding: 8px 16px;
             border: none;
@@ -564,7 +505,7 @@
                         </div>
                         <div class="image-option">
                             <input type="radio" id="upload-image" name="imageOption" value="upload">
-                            <label for="upload-image">📤 Upload my own image</label>
+                            <label for="upload-image">📤 Upload my own image(s)</label>
                         </div>
                         <div class="image-option">
                             <input type="radio" id="no-image" name="imageOption" value="none">
@@ -603,35 +544,95 @@
                         </small>
                     </div>
                     
+                    <div class="form-group">
+                        <label>📋 Select Mailing Lists</label>
+                        <div id="listSelection" style="background: #1a1a1a; padding: 15px; border-radius: 6px; border: 2px solid #404040; max-height: 200px; overflow-y: auto;">
+                            <div id="listsLoading" style="text-align: center; color: #cccccc;">
+                                <div class="spinner-small" style="display: inline-block;"></div>
+                                Loading lists...
+                            </div>
+                            <div id="listsContainer" style="display: none;">
+                                <!-- Lists will be loaded here -->
+                            </div>
+                            <div id="listsError" style="display: none; color: #f8d7da; text-align: center;">
+                                <!-- Error message will appear here -->
+                            </div>
+                        </div>
+                        <small style="color: #cccccc; display: block; margin-top: 5px;">
+                            Select which lists to send this campaign to
+                        </small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>⏰ Campaign Schedule</label>
+                        <div style="background: #1a1a1a; padding: 15px; border-radius: 6px; border: 2px solid #404040;">
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: flex; align-items: center; cursor: pointer; font-weight: normal;">
+                                    <input 
+                                        type="radio" 
+                                        name="sendOption" 
+                                        value="draft" 
+                                        checked
+                                        style="margin-right: 10px;"
+                                    >
+                                    💾 Save as Draft
+                                </label>
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: flex; align-items: center; cursor: pointer; font-weight: normal;">
+                                    <input 
+                                        type="radio" 
+                                        name="sendOption" 
+                                        value="send_now"
+                                        style="margin-right: 10px;"
+                                    >
+                                    🚀 Send Immediately
+                                </label>
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: flex; align-items: center; cursor: pointer; font-weight: normal;">
+                                    <input 
+                                        type="radio" 
+                                        name="sendOption" 
+                                        value="schedule"
+                                        style="margin-right: 10px;"
+                                    >
+                                    📅 Schedule for Later
+                                </label>
+                            </div>
+                            <div id="scheduleDateTime" style="display: none; margin-top: 15px; padding: 10px; background: #2c2c2c; border-radius: 6px;">
+                                <label for="scheduledTime" style="display: block; margin-bottom: 8px; font-weight: normal; font-size: 14px;">
+                                    Select Date & Time:
+                                </label>
+                                <input 
+                                    type="datetime-local" 
+                                    id="scheduledTime" 
+                                    name="scheduledTime"
+                                    style="width: 100%; padding: 10px; border: 1px solid #404040; border-radius: 4px; font-size: 14px; background: #1a1a1a; color: #ffffff;"
+                                >
+                            </div>
+                        </div>
+                        <small style="color: #cccccc; display: block; margin-top: 5px;">
+                            Choose when to send your campaign
+                        </small>
+                    </div>
+                    
                     <div id="uploadSection" style="display: none;">
                         <div class="form-group">
-                            <label>Upload Image:</label>
-                            <input type="file" id="imageUpload" class="file-upload" accept="image/*">
-                            <label for="imageUpload" class="file-upload-label">Choose Image</label>
-                            <img id="uploadedImage" class="uploaded-image" alt="Uploaded image">
-                        </div>
-                        
-                        <!-- Image Resizer Module -->
-                        <div id="resizerSection" style="display: none;">
-                            <div class="form-group">
-                                <h4>🔧 Image Resizer</h4>
-                                <p><small>Resize your image to prevent large file sizes</small></p>
-                                
-                                <div class="resizer-controls">
-                                    <label>Target Width: <span id="targetWidth">560</span>px</label>
-                                    <input type="range" id="widthSlider" min="200" max="800" value="560" step="10">
-                                    
-                                    <label>Quality: <span id="qualityValue">70</span>%</label>
-                                    <input type="range" id="qualitySlider" min="20" max="90" value="70" step="5">
-                                    
-                                    <div class="resizer-info">
-                                        <p><strong>Original:</strong> <span id="originalSize">-</span></p>
-                                        <p><strong>Resized:</strong> <span id="resizedSize">-</span></p>
-                                        <p><strong>Dimensions:</strong> <span id="imageDimensions">-</span></p>
-                                    </div>
-                                    
-                                    <button type="button" id="resizeBtn" class="btn btn-secondary">🔄 Resize Image</button>
-                                    <button type="button" id="resetBtn" class="btn btn-warning">🔄 Reset</button>
+                            <h4>Upload Images (up to 2):</h4>
+                            <p style="color: #cccccc; font-size: 14px; margin-bottom: 15px;">
+                                Supported formats: JPG, PNG, WEBP. Max size: 5MB each. Images will be optimized automatically.
+                            </p>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                <div>
+                                    <input type="file" id="imageUpload" class="file-upload" accept="image/*">
+                                    <label for="imageUpload" class="file-upload-label" style="width: 100%; text-align: center;">Choose Image 1</label>
+                                    <img id="uploadedImage" class="uploaded-image" alt="Uploaded image 1" style="max-width: 100%;">
+                                </div>
+                                <div>
+                                    <input type="file" id="imageUpload2" class="file-upload" accept="image/*">
+                                    <label for="imageUpload2" class="file-upload-label" style="width: 100%; text-align: center;">Choose Image 2 (optional)</label>
+                                    <img id="uploadedImage2" class="uploaded-image" alt="Uploaded image 2" style="max-width: 100%;">
                                 </div>
                             </div>
                         </div>
@@ -677,6 +678,12 @@
                 <div class="content-preview" id="contentPreview">
                     <!-- Content details will be inserted here -->
                 </div>
+                <div style="margin-top: 20px; display: none;" id="editActions">
+                    <button class="btn btn-primary" id="updatePreviewBtn">🔄 Update Preview</button>
+                    <small style="color: #cccccc; display: block; margin-top: 10px;">
+                        After editing, click "Update Preview" to see your changes in the Email Preview tab
+                    </small>
+                </div>
             </div>
             
             <div class="tab-content" id="imageTab">
@@ -687,8 +694,30 @@
             
             <div class="action-buttons">
                 <button class="btn btn-primary" id="downloadBtn">📥 Download HTML</button>
-                <button class="btn btn-secondary" id="editBtn">✏️ Edit Template</button>
+                <button class="btn btn-warning" id="testEmailBtn">📧 Send Test Email</button>
                 <button class="btn btn-success" id="sendyBtn">📤 Create Campaign in Sendy</button>
+            </div>
+            
+            <div id="testEmailSection" style="display: none; margin-top: 20px; padding: 20px; background: #1a1a1a; border-radius: 8px; border: 2px solid #ffc107;">
+                <h4 style="color: #ffc107; margin-bottom: 15px;">📧 Send Test Email</h4>
+                <div style="margin-bottom: 15px;">
+                    <label for="testEmailInput" style="display: block; margin-bottom: 8px; color: #ffffff;">
+                        Email Address(es):
+                    </label>
+                    <input 
+                        type="text" 
+                        id="testEmailInput" 
+                        placeholder="test@example.com, another@example.com"
+                        style="width: 100%; padding: 10px; border: 1px solid #404040; border-radius: 4px; font-size: 14px; background: #2c2c2c; color: #ffffff;"
+                    >
+                    <small style="color: #cccccc; display: block; margin-top: 5px;">
+                        Enter one or more email addresses (comma-separated)
+                    </small>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-warning" id="sendTestBtn">✉️ Send Test</button>
+                    <button class="btn btn-secondary" id="cancelTestBtn">❌ Cancel</button>
+                </div>
             </div>
         </div>
     </div>
@@ -702,10 +731,85 @@
             const previewContainer = document.getElementById('previewContainer');
             const uploadSection = document.getElementById('uploadSection');
             const imageUpload = document.getElementById('imageUpload');
+            const imageUpload2 = document.getElementById('imageUpload2');
             const uploadedImage = document.getElementById('uploadedImage');
+            const uploadedImage2 = document.getElementById('uploadedImage2');
             
             let currentResult = null;
             let uploadedImageData = null;
+            let uploadedImageData2 = null;
+            let availableLists = [];
+            
+            // Load Sendy lists on page load
+            loadSendyLists();
+            
+            // Schedule datetime visibility handling
+            const sendOptions = document.querySelectorAll('input[name="sendOption"]');
+            const scheduleDateTime = document.getElementById('scheduleDateTime');
+            
+            sendOptions.forEach(option => {
+                option.addEventListener('change', function() {
+                    if (this.value === 'schedule') {
+                        scheduleDateTime.style.display = 'block';
+                    } else {
+                        scheduleDateTime.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Load Sendy lists function
+            async function loadSendyLists() {
+                const listsLoading = document.getElementById('listsLoading');
+                const listsContainer = document.getElementById('listsContainer');
+                const listsError = document.getElementById('listsError');
+                
+                try {
+                    const response = await fetch('/get-sendy-lists');
+                    const result = await response.json();
+                    
+                    if (result.success && result.lists && result.lists.length > 0) {
+                        availableLists = result.lists;
+                        
+                        // Display lists as checkboxes
+                        listsContainer.innerHTML = '';
+                        result.lists.forEach((list, index) => {
+                            const listDiv = document.createElement('div');
+                            listDiv.style.marginBottom = '10px';
+                            listDiv.innerHTML = `
+                                <label style="display: flex; align-items: center; cursor: pointer; font-weight: normal;">
+                                    <input 
+                                        type="checkbox" 
+                                        name="list" 
+                                        value="${list.id}" 
+                                        ${index === 0 ? 'checked' : ''}
+                                        style="margin-right: 10px; width: 16px; height: 16px;"
+                                    >
+                                    <span style="color: #ffffff;">${list.name}</span>
+                                </label>
+                            `;
+                            listsContainer.appendChild(listDiv);
+                        });
+                        
+                        listsLoading.style.display = 'none';
+                        listsContainer.style.display = 'block';
+                    } else if (result.raw_response) {
+                        // Handle non-JSON response - show error with fallback
+                        console.warn('Sendy lists API returned non-JSON response:', result.raw_response);
+                        listsError.innerHTML = '⚠️ Could not load lists. Using default lists.';
+                        listsError.style.display = 'block';
+                        listsLoading.style.display = 'none';
+                    } else {
+                        listsError.innerHTML = '⚠️ No lists found. Please check your Sendy configuration.';
+                        listsError.style.display = 'block';
+                        listsLoading.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Error loading lists:', error);
+                    listsError.innerHTML = '❌ Failed to load lists: ' + error.message;
+                    listsError.style.display = 'block';
+                    listsLoading.style.display = 'none';
+                }
+            }
             
             // Image option handling
             const imageOptions = document.querySelectorAll('input[name="imageOption"]');
@@ -716,168 +820,67 @@
                     } else {
                         uploadSection.style.display = 'none';
                         uploadedImageData = null;
+                        uploadedImageData2 = null;
                         uploadedImage.style.display = 'none';
+                        uploadedImage2.style.display = 'none';
                     }
                 });
             });
             
-            // File upload handling
+            // Auto-resize image to 560px width
+            function autoResizeImage(file, callback) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Calculate new dimensions (560px width, proportional height)
+                        const targetWidth = 560;
+                        const ratio = targetWidth / img.width;
+                        const newHeight = Math.round(img.height * ratio);
+                        
+                        canvas.width = targetWidth;
+                        canvas.height = newHeight;
+                        
+                        // Draw resized image
+                        ctx.drawImage(img, 0, 0, targetWidth, newHeight);
+                        
+                        // Convert to base64 with 70% quality
+                        const resizedData = canvas.toDataURL('image/jpeg', 0.7);
+                        
+                        console.log(`✅ Image auto-resized: ${targetWidth}×${newHeight}px`);
+                        callback(resizedData);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            // File upload handling for image 1
             imageUpload.addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        uploadedImageData = e.target.result;
-                        uploadedImage.src = uploadedImageData;
+                    autoResizeImage(file, function(resizedData) {
+                        uploadedImageData = resizedData;
+                        uploadedImage.src = resizedData;
                         uploadedImage.style.display = 'block';
-                        
-                        // Show resizer section and initialize
-                        document.getElementById('resizerSection').style.display = 'block';
-                        initializeResizer(file, e.target.result);
-                    };
-                    reader.readAsDataURL(file);
+                    });
                 }
             });
             
-            // Image Resizer functionality
-            let originalImageData = null;
-            let originalFile = null;
-            
-            function initializeResizer(file, imageData) {
-                originalFile = file;
-                originalImageData = imageData;
-                
-                // Display original file info
-                document.getElementById('originalSize').textContent = formatBytes(file.size);
-                
-                // Create image to get dimensions
-                const img = new Image();
-                img.onload = function() {
-                    document.getElementById('imageDimensions').textContent = `${img.width} × ${img.height}px`;
-                    document.getElementById('resizedSize').textContent = formatBytes(file.size);
-                };
-                img.src = imageData;
-                
-                // Update sliders
-                updateSliderValues();
-            }
-            
-            function updateSliderValues() {
-                const widthSlider = document.getElementById('widthSlider');
-                const qualitySlider = document.getElementById('qualitySlider');
-                
-                document.getElementById('targetWidth').textContent = widthSlider.value;
-                document.getElementById('qualityValue').textContent = qualitySlider.value;
-                
-                // Update resized size in real-time
-                if (originalImageData) {
-                    const width = parseInt(widthSlider.value);
-                    const quality = parseInt(qualitySlider.value);
-                    updateResizedSize(originalImageData, width, quality);
+            // File upload handling for image 2
+            imageUpload2.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    autoResizeImage(file, function(resizedData) {
+                        uploadedImageData2 = resizedData;
+                        uploadedImage2.src = resizedData;
+                        uploadedImage2.style.display = 'block';
+                    });
                 }
-            }
-            
-            function updateResizedSize(imageData, targetWidth, quality) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    
-                    // Calculate new height maintaining aspect ratio
-                    const ratio = targetWidth / img.width;
-                    const newHeight = Math.round(img.height * ratio);
-                    
-                    canvas.width = targetWidth;
-                    canvas.height = newHeight;
-                    
-                    // Draw resized image
-                    ctx.drawImage(img, 0, 0, targetWidth, newHeight);
-                    
-                    // Convert to blob with specified quality
-                    canvas.toBlob(function(blob) {
-                        document.getElementById('resizedSize').textContent = formatBytes(blob.size);
-                        document.getElementById('imageDimensions').textContent = `${targetWidth} × ${newHeight}px`;
-                    }, 'image/jpeg', quality / 100);
-                };
-                img.src = imageData;
-            }
-            
-            function formatBytes(bytes) {
-                if (bytes === 0) return '0 Bytes';
-                const k = 1024;
-                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-                const i = Math.floor(Math.log(bytes) / Math.log(k));
-                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-            }
-            
-            // Slider event listeners with debounce
-            let resizeTimeout;
-            function debouncedUpdateSliderValues() {
-                clearTimeout(resizeTimeout);
-                resizeTimeout = setTimeout(updateSliderValues, 100); // 100ms delay
-            }
-            
-            document.getElementById('widthSlider').addEventListener('input', debouncedUpdateSliderValues);
-            document.getElementById('qualitySlider').addEventListener('input', debouncedUpdateSliderValues);
-            
-            // Resize button
-            document.getElementById('resizeBtn').addEventListener('click', function() {
-                if (!originalImageData) return;
-                
-                const width = parseInt(document.getElementById('widthSlider').value);
-                const quality = parseInt(document.getElementById('qualitySlider').value);
-                
-                resizeImage(originalImageData, width, quality);
             });
-            
-            // Reset button
-            document.getElementById('resetBtn').addEventListener('click', function() {
-                if (!originalFile || !originalImageData) return;
-                
-                uploadedImageData = originalImageData;
-                uploadedImage.src = originalImageData;
-                document.getElementById('resizedSize').textContent = formatBytes(originalFile.size);
-                
-                // Reset sliders
-                document.getElementById('widthSlider').value = 560;
-                document.getElementById('qualitySlider').value = 70;
-                updateSliderValues();
-            });
-            
-            function resizeImage(imageData, targetWidth, quality) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    
-                    // Calculate new height maintaining aspect ratio
-                    const ratio = targetWidth / img.width;
-                    const newHeight = Math.round(img.height * ratio);
-                    
-                    canvas.width = targetWidth;
-                    canvas.height = newHeight;
-                    
-                    // Draw resized image
-                    ctx.drawImage(img, 0, 0, targetWidth, newHeight);
-                    
-                    // Convert to blob with specified quality
-                    canvas.toBlob(function(blob) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            uploadedImageData = e.target.result;
-                            uploadedImage.src = uploadedImageData;
-                            
-                            // Update info
-                            document.getElementById('resizedSize').textContent = formatBytes(blob.size);
-                            document.getElementById('imageDimensions').textContent = `${targetWidth} × ${newHeight}px`;
-                            
-                            console.log(`✅ Image resized: ${formatBytes(blob.size)} (${targetWidth}×${newHeight}px, ${quality}% quality)`);
-                        };
-                        reader.readAsDataURL(blob);
-                    }, 'image/jpeg', quality / 100);
-                };
-                img.src = imageData;
-            }
             
             function startStatusLoader() {
                 const statusContent = document.getElementById('statusContent');
@@ -946,7 +949,7 @@
                 
                 // Validate upload if selected
                 if (selectedImageOption === 'upload' && !uploadedImageData) {
-                    showError('Please upload an image or select a different option');
+                    showError('Please upload at least one image or select a different option');
                     return;
                 }
                 
@@ -973,8 +976,13 @@
                     const generatePreheader = document.getElementById('generatePreheader').checked;
                     formData.append('generatePreheader', generatePreheader ? 'yes' : 'no');
                     
-                    if (selectedImageOption === 'upload' && uploadedImageData) {
-                        formData.append('uploadedImage', uploadedImageData);
+                    if (selectedImageOption === 'upload') {
+                        if (uploadedImageData) {
+                            formData.append('uploadedImage', uploadedImageData);
+                        }
+                        if (uploadedImageData2) {
+                            formData.append('uploadedImage2', uploadedImageData2);
+                        }
                     }
                     
                     const response = await fetch('/generate', {
@@ -1014,29 +1022,71 @@
                     URL.revokeObjectURL(blobUrl);
                 };
                 
-                // Display content details
+                // Display content details as editable fields
                 const contentPreview = document.getElementById('contentPreview');
                 contentPreview.innerHTML = `
-                    <h3>Generated Content</h3>
+                    <h3>Edit Content</h3>
                     <div class="content-item">
-                        <strong>Subject Line:</strong> ${result.content.subject_line}
+                        <strong>Subject Line:</strong>
+                        <input type="text" id="edit_subject_line" value="${escapeHtml(result.content.subject_line)}" 
+                            style="width: 100%; margin-top: 5px; padding: 8px; background: #1a1a1a; color: #ffffff; border: 1px solid #404040; border-radius: 4px;">
                     </div>
                     <div class="content-item">
-                        <strong>Hero Title:</strong> ${result.content.hero_title}
+                        <strong>Preheader Text:</strong>
+                        <input type="text" id="edit_preheader" value="${escapeHtml(result.content.preheader || '')}" 
+                            style="width: 100%; margin-top: 5px; padding: 8px; background: #1a1a1a; color: #ffffff; border: 1px solid #404040; border-radius: 4px;">
                     </div>
                     <div class="content-item">
-                        <strong>Greeting:</strong> ${result.content.greeting}
+                        <strong>Hero Title:</strong>
+                        <input type="text" id="edit_hero_title" value="${escapeHtml(result.content.hero_title)}" 
+                            style="width: 100%; margin-top: 5px; padding: 8px; background: #1a1a1a; color: #ffffff; border: 1px solid #404040; border-radius: 4px;">
                     </div>
                     <div class="content-item">
-                        <strong>Main Content:</strong> ${result.content.main_content}
+                        <strong>Greeting:</strong>
+                        <input type="text" id="edit_greeting" value="${escapeHtml(result.content.greeting)}" 
+                            style="width: 100%; margin-top: 5px; padding: 8px; background: #1a1a1a; color: #ffffff; border: 1px solid #404040; border-radius: 4px;">
                     </div>
                     <div class="content-item">
-                        <strong>CTA Text:</strong> ${result.content.cta_text}
+                        <strong>Main Content:</strong>
+                        <textarea id="edit_main_content" rows="4" 
+                            style="width: 100%; margin-top: 5px; padding: 8px; background: #1a1a1a; color: #ffffff; border: 1px solid #404040; border-radius: 4px;">${escapeHtml(result.content.main_content)}</textarea>
                     </div>
                     <div class="content-item">
-                        <strong>CTA URL:</strong> ${result.content.cta_url}
+                        <strong>CTA Text:</strong>
+                        <input type="text" id="edit_cta_text" value="${escapeHtml(result.content.cta_text)}" 
+                            style="width: 100%; margin-top: 5px; padding: 8px; background: #1a1a1a; color: #ffffff; border: 1px solid #404040; border-radius: 4px;">
+                    </div>
+                    <div class="content-item">
+                        <strong>CTA URL:</strong>
+                        <input type="url" id="edit_cta_url" value="${escapeHtml(result.content.cta_url)}" 
+                            style="width: 100%; margin-top: 5px; padding: 8px; background: #1a1a1a; color: #ffffff; border: 1px solid #404040; border-radius: 4px;">
+                    </div>
+                    <div class="content-item">
+                        <strong>Offer Details:</strong>
+                        <textarea id="edit_offer_details" rows="2" 
+                            style="width: 100%; margin-top: 5px; padding: 8px; background: #1a1a1a; color: #ffffff; border: 1px solid #404040; border-radius: 4px;">${escapeHtml(result.content.offer_details || '')}</textarea>
+                    </div>
+                    <div class="content-item">
+                        <strong>Urgency Text:</strong>
+                        <input type="text" id="edit_urgency_text" value="${escapeHtml(result.content.urgency_text || '')}" 
+                            style="width: 100%; margin-top: 5px; padding: 8px; background: #1a1a1a; color: #ffffff; border: 1px solid #404040; border-radius: 4px;">
                     </div>
                 `;
+                
+                // Show edit actions
+                document.getElementById('editActions').style.display = 'block';
+                
+                function escapeHtml(text) {
+                    if (!text) return '';
+                    const map = {
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#039;'
+                    };
+                    return String(text).replace(/[&<>"']/g, m => map[m]);
+                }
                 
                 // Display image prompt
                 const imagePromptPreview = document.getElementById('imagePromptPreview');
@@ -1073,15 +1123,136 @@
                 }
             });
             
-            // Edit functionality
-            document.getElementById('editBtn').addEventListener('click', function() {
-                if (currentResult) {
-                    // For now, just show the content in an editable format
-                    const newPrompt = prompt('Edit your campaign description:', document.getElementById('prompt').value);
-                    if (newPrompt) {
-                        document.getElementById('prompt').value = newPrompt;
-                        form.dispatchEvent(new Event('submit'));
+            // Update Preview functionality
+            document.getElementById('updatePreviewBtn').addEventListener('click', async function() {
+                if (!currentResult) return;
+                
+                // Collect edited content from form fields
+                const updatedContent = {
+                    subject_line: document.getElementById('edit_subject_line').value,
+                    preheader: document.getElementById('edit_preheader').value,
+                    hero_title: document.getElementById('edit_hero_title').value,
+                    greeting: document.getElementById('edit_greeting').value,
+                    main_content: document.getElementById('edit_main_content').value,
+                    cta_text: document.getElementById('edit_cta_text').value,
+                    cta_url: document.getElementById('edit_cta_url').value,
+                    offer_details: document.getElementById('edit_offer_details').value,
+                    urgency_text: document.getElementById('edit_urgency_text').value
+                };
+                
+                // Show loading state
+                const btn = document.getElementById('updatePreviewBtn');
+                const originalText = btn.textContent;
+                btn.textContent = '⏳ Updating...';
+                btn.disabled = true;
+                
+                try {
+                    // Call backend to regenerate HTML
+                    const response = await fetch('/regenerate-preview', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            content: updatedContent,
+                            image_urls: currentResult.image_urls || []
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // Update currentResult with new content and HTML
+                        currentResult.content = updatedContent;
+                        currentResult.html_template = result.html_template;
+                        
+                        // Update preview
+                        const emailPreview = document.getElementById('emailPreview');
+                        const blob = new Blob([result.html_template], { type: 'text/html' });
+                        const blobUrl = URL.createObjectURL(blob);
+                        emailPreview.innerHTML = `<iframe src="${blobUrl}"></iframe>`;
+                        
+                        const iframe = emailPreview.querySelector('iframe');
+                        iframe.onload = function() {
+                            URL.revokeObjectURL(blobUrl);
+                        };
+                        
+                        showSuccess('✅ Preview updated successfully!');
+                        
+                        // Switch to preview tab
+                        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                        document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+                        document.querySelector('[data-tab="preview"]').classList.add('active');
+                        document.getElementById('previewTab').classList.add('active');
+                    } else {
+                        showError('Failed to update preview: ' + (result.error || 'Unknown error'));
                     }
+                } catch (error) {
+                    showError('Network error: ' + error.message);
+                } finally {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }
+            });
+            
+            // Test Email button - show/hide section
+            document.getElementById('testEmailBtn').addEventListener('click', function() {
+                const section = document.getElementById('testEmailSection');
+                section.style.display = section.style.display === 'none' ? 'block' : 'none';
+            });
+            
+            // Cancel test email
+            document.getElementById('cancelTestBtn').addEventListener('click', function() {
+                document.getElementById('testEmailSection').style.display = 'none';
+                document.getElementById('testEmailInput').value = '';
+            });
+            
+            // Send test email
+            document.getElementById('sendTestBtn').addEventListener('click', async function() {
+                if (!currentResult) {
+                    showError('No template available to send');
+                    return;
+                }
+                
+                const emails = document.getElementById('testEmailInput').value.trim();
+                if (!emails) {
+                    showError('Please enter at least one email address');
+                    return;
+                }
+                
+                // Show loading state
+                const btn = document.getElementById('sendTestBtn');
+                const originalText = btn.textContent;
+                btn.textContent = '✉️ Sending...';
+                btn.disabled = true;
+                
+                try {
+                    const response = await fetch('/send-test-email', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            emails: emails,
+                            content: currentResult.content,
+                            html_template: currentResult.html_template
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        showSuccess(`✅ Test email sent to: ${emails}`);
+                        document.getElementById('testEmailSection').style.display = 'none';
+                        document.getElementById('testEmailInput').value = '';
+                    } else {
+                        showError('Failed to send test email: ' + (result.error || 'Unknown error'));
+                    }
+                } catch (error) {
+                    showError('Network error: ' + error.message);
+                } finally {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
                 }
             });
             
@@ -1090,6 +1261,40 @@
                 if (!currentResult) {
                     showError('No template available to send to Sendy');
                     return;
+                }
+                
+                // Collect selected list IDs
+                const selectedLists = Array.from(document.querySelectorAll('input[name="list"]:checked'))
+                    .map(checkbox => checkbox.value);
+                
+                if (selectedLists.length === 0) {
+                    showError('Please select at least one mailing list');
+                    return;
+                }
+                
+                const listIds = selectedLists.join(',');
+                
+                // Get send option
+                const sendOption = document.querySelector('input[name="sendOption"]:checked').value;
+                
+                // Get scheduled datetime if applicable
+                let scheduledDatetime = null;
+                if (sendOption === 'schedule') {
+                    const scheduledTime = document.getElementById('scheduledTime').value;
+                    if (!scheduledTime) {
+                        showError('Please select a date and time for scheduled send');
+                        return;
+                    }
+                    // Convert to Unix timestamp
+                    const dateObj = new Date(scheduledTime);
+                    scheduledDatetime = Math.floor(dateObj.getTime() / 1000);
+                    const currentTime = Math.floor(Date.now() / 1000);
+                    
+                    // Validate that scheduled time is in the future
+                    if (scheduledDatetime <= currentTime) {
+                        showError('Please select a future date and time for scheduling');
+                        return;
+                    }
                 }
                 
                 // Show loading state
@@ -1102,7 +1307,10 @@
                     console.log('📤 Sending to Sendy:', {
                         content: currentResult.content,
                         filename: currentResult.filename,
-                        templateSize: currentResult.html_template.length
+                        templateSize: currentResult.html_template.length,
+                        listIds: listIds,
+                        sendOption: sendOption,
+                        scheduledDatetime: scheduledDatetime
                     });
                     
                     const response = await fetch('/send-to-sendy', {
@@ -1113,7 +1321,10 @@
                         body: JSON.stringify({
                             content: currentResult.content,
                             html_template: currentResult.html_template,
-                            filename: currentResult.filename
+                            filename: currentResult.filename,
+                            list_ids: listIds,
+                            send_option: sendOption,
+                            scheduled_datetime: scheduledDatetime
                         })
                     });
                     
@@ -1122,7 +1333,15 @@
                     console.log('📡 Sendy response:', result);
                     
                     if (result.success) {
-                        showSuccess(`✅ ${result.message} (Campaign ID: ${result.campaign_id})`);
+                        let message = result.message;
+                        if (sendOption === 'send_now') {
+                            message = '✅ Campaign sent immediately!';
+                        } else if (sendOption === 'schedule') {
+                            message = '✅ Campaign scheduled successfully!';
+                        } else {
+                            message = '✅ Campaign saved as draft!';
+                        }
+                        showSuccess(message);
                     } else {
                         showError(`❌ Sendy Error: ${result.error}`);
                     }

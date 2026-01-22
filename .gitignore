@@ -71,4 +71,8 @@ Thumbs.db
 
 # Temporary files
 *.tmp
-*.temp 
+*.temp
+
+# Backup files
+*_backup.py
+*_fresh.py 
