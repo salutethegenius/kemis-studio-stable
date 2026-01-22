@@ -43,26 +43,29 @@ class TemplateGenerator:
         
     def generate_email_content(self, prompt):
         """Generate email content using OpenAI"""
-        system_prompt = """You are a Bahamian email marketing expert. Create SHORT, CLEAN email content that:
-        - Uses Bahamian tone and local references (Bay Street, straw markets, regattas, Junkanoo, conch salad)
-        - Is 4-5 lines maximum - keep it short and sweet
+        system_prompt = """You are a professional email marketing expert. Create SHORT, CLEAN email content that:
+        - Uses professional, engaging marketing language
+        - Uses clear, friendly greetings like "Hi" or "Hello"
+        - Is structured with headlines, subheadlines, and bullet points for clarity
         - Use single space after periods, no double spacing
         - Include 2-3 relevant emojis maximum
         - Focus on the specific business/promotion mentioned
         - Has a clear call-to-action
         - No long paragraphs or run-on sentences
-        - Use "Bey!" instead of "Hey" in greetings for authentic Bahamian tone
         
         Return the content in JSON format with these fields:
         {
             "subject_line": "Email subject line",
             "hero_title": "Main headline (max 3 words)",
             "greeting": "Personal greeting with [Name,fallback=there]",
-            "main_content": "Main body content - 4-5 short lines maximum, separated by &nbsp;",
+            "headline": "Main value proposition headline (compelling benefit)",
+            "subheadline": "Supporting subheadline that expands on the value",
+            "bullet_points": ["Key benefit 1", "Key benefit 2", "Key benefit 3"],
+            "main_content": "Closing paragraph - 2-3 short lines maximum, separated by &nbsp;",
             "cta_text": "Call to action button text",
             "cta_url": "Call to action URL",
             "urgency_text": "Urgency message if applicable",
-            "offer_details": "Specific offer details if applicable"
+            "offer_details": "Unique action-focused summary for CTA box (e.g., 'Click below to claim your 20% discount before Friday!') - must be different from main_content"
         }"""
         
         try:
@@ -246,12 +249,15 @@ class TemplateGenerator:
         return {
             "subject_line": f"Special Offer: {prompt}",
             "hero_title": "SPECIAL OFFER",
-            "greeting": "Hey Bey [Name,fallback=there]! 🎉",
+            "greeting": "Hi [Name,fallback=there]! 🎉",
+            "headline": "Exclusive Deal Just For You",
+            "subheadline": "Limited Time Opportunity",
+            "bullet_points": ["Great value", "Quality service", "Special pricing"],
             "main_content": f"Check out this amazing deal! {prompt}",
             "cta_text": "LEARN MORE",
             "cta_url": "https://www.kemis.net",
             "urgency_text": "Limited time offer!",
-            "offer_details": "Don't miss out!"
+            "offer_details": "Act now to secure your discount before this offer expires!"
         }
     
     def send_to_sendy(self, content, html_template, filename, list_ids=None, send_option='draft', scheduled_datetime=None):
@@ -542,7 +548,7 @@ class TemplateGenerator:
         
         html_template = f"""<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html dir="ltr" lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">
-<head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1" name="viewport"><meta name="x-apple-disable-message-reformatting"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta content="telephone=no" name="format-detection">
+<head><meta charset="UTF-8"><meta content="width=device-width, initial-scale=1" name="viewport"><meta name="x-apple-disable-message-reformatting"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta content="telephone=no" name="format-detection"><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark">
 	<title>{content['subject_line']}</title>
 	<!--[if (mso 16)]><style type="text/css">     a {{text-decoration: none;}}     </style><![endif]--><!--[if gte mso 9]><style>sup {{ font-size: 100% !important; }}</style><![endif]--><!--[if gte mso 9]><noscript> <xml> <o:OfficeDocumentSettings> <o:AllowPNG></o:AllowPNG> <o:PixelsPerInch>96</o:PixelsPerInch> </o:OfficeDocumentSettings> </xml>
 <![endif]--><!--[if mso]><xml> <w:WordDocument xmlns:w="urn:schemas-microsoft-com:office:word"> <w:DontUseAdvancedTypographyReadingMail/> </w:WordDocument> </xml>
@@ -550,7 +556,7 @@ class TemplateGenerator:
 	<style type="text/css">.rollover:hover .rollover-first {{ max-height:0px!important; display:none!important; }} .rollover:hover .rollover-second {{ max-height:none!important; display:block!important; }} .rollover span {{ font-size:0px; }} u + .body img ~ div div {{ display:none; }} #outlook a {{ padding:0; }} span.MsoHyperlink, span.MsoHyperlinkFollowed {{ color:inherit; mso-style-priority:99; }} a.ba {{ mso-style-priority:100!important; text-decoration:none!important; }} a[x-apple-data-detectors], #MessageViewBody a {{ color:inherit!important; text-decoration:none!important; font-size:inherit!important; font-family:inherit!important; font-weight:inherit!important; line-height:inherit!important; }} .q {{ display:none; float:left; overflow:hidden; width:0; max-height:0; line-height:0; mso-hide:all; }} @media only screen and (max-width:600px) {{.bw {{ padding-top:10px!important }} .bv {{ padding-bottom:10px!important }}
  .bu {{ padding-right:20px!important }} .bt {{ padding-left:20px!important }} .bs {{ padding-right:5px!important }} .br {{ padding-left:5px!important }} .bq {{ padding-left:0px!important }} .bp {{ padding-right:24px!important }} *[class="gmail-fix"] {{ display:none!important }} p, a {{ line-height:150%!important }} h1, h1 a {{ line-height:110%!important }} h2, h2 a {{ line-height:110%!important }} h3, h3 a {{ line-height:110%!important }} h4, h4 a {{ line-height:110%!important }} h5, h5 a {{ line-height:110%!important }} h6, h6 a {{ line-height:110%!important }} .bm p {{ }} .bl p {{ }} .bk p {{ }} h1 {{ font-size:36px!important; text-align:left }} h2 {{ font-size:26px!important; text-align:left }} h3 {{ font-size:20px!important; text-align:left }} h4 {{ font-size:24px!important; text-align:left }} h5 {{ font-size:20px!important; text-align:left }} h6 {{ font-size:16px!important; text-align:left }} .o td a {{ font-size:12px!important }} .bm p, .bm a {{ font-size:14px!important }}
  .bl p, .bl a {{ font-size:14px!important }} .bk p, .bk a {{ font-size:12px!important }} .bh, .bh h1, .bh h2, .bh h3, .bh h4, .bh h5, .bh h6 {{ text-align:center!important }} .bg .rollover:hover .rollover-second, .bh .rollover:hover .rollover-second, .bi .rollover:hover .rollover-second {{ display:inline!important }} a.ba, button.ba {{ font-size:20px!important; padding:10px 20px 10px 20px!important; line-height:120%!important }} a.ba, button.ba, .be {{ display:inline-block!important }} .z, .z .ba, .bb, .bb td, .o {{ display:inline-block!important }} .t table, .u table, .v table, .t, .v, .u {{ width:100%!important; max-width:600px!important }} .adapt-img {{ width:100%!important; height:auto!important }} .q {{ width:auto!important; overflow:visible!important; float:none!important; max-height:inherit!important; line-height:inherit!important }} tr.q {{ display:table-row!important }} .o td {{ width:1%!important }}
- table.n, .esd-block-html table {{ width:auto!important }} .h-auto {{ height:auto!important }} .l .m.e, .l .m.e * {{ font-size:13px!important; line-height:150%!important }} .k .d.e, .k .d.e * {{ font-size:16px!important; line-height:150%!important }} .j .i, .j .i * {{ font-size:48px!important; line-height:110%!important }} .h .i, .j .i * {{ font-size:48px!important; line-height:110%!important }} .f .g.e, .f .g.e * {{ font-size:22px!important; line-height:150%!important }} .c .d.e, .c .d.e * {{ font-size:16px!important; line-height:150%!important }} .a .b, .a .b * {{ font-size:14px!important; line-height:150%!important }} }} @media screen and (max-width:384px) {{.mail-message-content {{ width:414px!important }} }}
+ table.n, .esd-block-html table {{ width:auto!important }} .h-auto {{ height:auto!important }} .l .m.e, .l .m.e * {{ font-size:13px!important; line-height:150%!important }} .k .d.e, .k .d.e * {{ font-size:16px!important; line-height:150%!important }} .j .i, .j .i * {{ font-size:48px!important; line-height:110%!important }} .h .i, .j .i * {{ font-size:48px!important; line-height:110%!important }} .f .g.e, .f .g.e * {{ font-size:22px!important; line-height:150%!important }} .c .d.e, .c .d.e * {{ font-size:16px!important; line-height:150%!important }} .a .b, .a .b * {{ font-size:14px!important; line-height:150%!important }} .header-logo, .header-menu, .header-cta {{ display:block!important; width:100%!important; text-align:center!important; padding:10px 0!important }} .header-menu td {{ display:block!important; padding:8px 0!important; text-align:center!important }} .footer-links td {{ display:block!important; text-align:center!important; padding:5px 0!important }} }} @media screen and (max-width:384px) {{.mail-message-content {{ width:414px!important }} }} @media (prefers-color-scheme: dark) {{ body, .es-wrapper {{ background-color:#1a1a1a!important }} .bm {{ background-color:#2d2d2d!important }} p, h1, h2, h3, h4, h5, h6, td, li {{ color:#ffffff!important }} a {{ color:#00CED1!important }} .footer-bg {{ background-color:#1a1a1a!important }} }}
 	</style>
 </head>
 <body class="body" style="width:100%;height:100%;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;padding:0;Margin:0">
@@ -611,7 +617,7 @@ class TemplateGenerator:
 												<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
 													<tbody>
 														<tr>
-															<td align="left" style="padding:0;Margin:0;width:200px;vertical-align:middle">
+															<td align="left" class="header-logo" style="padding:0;Margin:0;width:200px;vertical-align:middle">
 															<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
 																<tbody>
 																	<tr>
@@ -631,27 +637,18 @@ class TemplateGenerator:
 																</tbody>
 															</table>
 															</td>
-															<td align="center" style="padding:0;Margin:0;width:200px;vertical-align:middle">
+															<td align="center" class="header-menu" style="padding:0;Margin:0;width:200px;vertical-align:middle">
 															<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
 																<tbody>
 																	<tr>
-																		<td align="center" style="padding:0;Margin:0;padding-right:15px">
-																		<a href="https://kemis.net" style="text-decoration:none;color:#666666;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:normal;">Home</a>
-																		</td>
-																		<td align="center" style="padding:0;Margin:0;padding-right:15px">
-																		<a href="https://start.kemis.net/services" style="text-decoration:none;color:#666666;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:normal;">Services</a>
-																		</td>
-																		<td align="center" style="padding:0;Margin:0;padding-right:15px">
-																		<a href="https://start.kemis.net/statistics" style="text-decoration:none;color:#666666;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:normal;">Statistics</a>
-																		</td>
 																		<td align="center" style="padding:0;Margin:0">
-																		<a href="https://start.kemis.net/contact" style="text-decoration:none;color:#666666;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:normal;">Contact</a>
+																		<a href="https://start.kemis.net/services" style="text-decoration:none;color:#666666;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:normal;">Advertising Rates</a>
 																		</td>
 																	</tr>
 																</tbody>
 															</table>
 															</td>
-															<td align="right" style="padding:0;Margin:0;width:160px;vertical-align:middle">
+															<td align="right" class="header-cta" style="padding:0;Margin:0;width:160px;vertical-align:middle">
 															<a href="https://dzvs3n3sqle.typeform.com/to/JxCYlnLb" style="display:inline-block;background-color:#00CED1;color:#ffffff;text-decoration:none;padding:8px 16px;border-radius:4px;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:bold;line-height:1.2;text-align:center;margin:0;">Join Our List</a>
 															</td>
 														</tr>
@@ -697,11 +694,19 @@ class TemplateGenerator:
 														</tr>
 														<tr>
 															<td align="left" class="c bt bu" style="Margin:0;padding-top:3px;padding-bottom:3px;padding-right:30px;padding-left:30px">
-															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:27px;letter-spacing:0;color:#333333;font-size:18px;text-align:center">{content['greeting']}</p>
+															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:27px;letter-spacing:0;color:#333333;font-size:18px;text-align:center">{content.get('greeting', 'Hi [Name,fallback=there]!')}</p>
 
 															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:27px;letter-spacing:0;color:#333333;font-size:18px;text-align:center">&nbsp;</p>
 
-															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:27px;letter-spacing:0;color:#333333;font-size:18px;text-align:center">{content['main_content']}</p>
+															{self._get_headline_html(content.get('headline', ''))}
+															
+															{self._get_subheadline_html(content.get('subheadline', ''))}
+															
+															{self._get_bullet_points_html(content.get('bullet_points', []))}
+
+															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:27px;letter-spacing:0;color:#333333;font-size:18px;text-align:center">&nbsp;</p>
+
+															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:27px;letter-spacing:0;color:#333333;font-size:18px;text-align:center">{content.get('main_content', '')}</p>
 															</td>
 														</tr>
 													</tbody>
@@ -757,7 +762,7 @@ class TemplateGenerator:
 				<tbody>
 					<tr>
 						<td align="center" style="padding:0;Margin:0">
-						<table align="center" bgcolor="#f8f9fa" cellpadding="0" cellspacing="0" class="bm" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;background-color:#f8f9fa;width:600px;max-width:100%">
+						<table align="center" bgcolor="#f8f9fa" cellpadding="0" cellspacing="0" class="bm footer-bg" role="none" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;background-color:#f8f9fa;width:600px;max-width:100%">
 							<tbody>
 								<tr>
 									<td align="center" class="mobile-padding" style="Margin:0;padding-top:30px;padding-right:20px;padding-bottom:30px;padding-left:20px">
@@ -777,7 +782,7 @@ class TemplateGenerator:
 														<tr>
 															<td align="center" class="bk" style="padding:0;Margin:0;padding-top:20px">
 															<p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;font-size:12px;font-style:normal;font-weight:normal;color:#666666">
-																2025 © Kemis Group of Companies Inc. All rights reserved.
+																2026 © Kemis Group of Companies Inc. All rights reserved.
 															</p>
 															</td>
 														</tr>
@@ -790,7 +795,7 @@ class TemplateGenerator:
 														</tr>
 														<tr>
 															<td align="center" class="bk" style="padding:0;Margin:0;padding-top:20px">
-															<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
+															<table cellpadding="0" cellspacing="0" class="footer-links" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;width:100%;margin:0 auto" align="center">
 																<tbody>
 																	<tr>
 																		<td align="center" style="padding:0;Margin:0;padding-right:15px">
@@ -903,6 +908,48 @@ class TemplateGenerator:
                 html_parts.append(img_html)
         
         return ''.join(html_parts)
+    
+    def _get_headline_html(self, headline):
+        """Generate HTML for headline (h2)"""
+        if not headline:
+            return ''
+        return f'<h2 class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, \'helvetica neue\', helvetica, sans-serif;line-height:32px;letter-spacing:0;color:#333333;font-size:26px;font-weight:bold;text-align:center;padding-top:10px;padding-bottom:5px">{headline}</h2>'
+    
+    def _get_subheadline_html(self, subheadline):
+        """Generate HTML for subheadline (h3)"""
+        if not subheadline:
+            return ''
+        return f'<h3 class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, \'helvetica neue\', helvetica, sans-serif;line-height:28px;letter-spacing:0;color:#666666;font-size:20px;font-weight:normal;text-align:center;padding-top:5px;padding-bottom:15px">{subheadline}</h3>'
+    
+    def _get_bullet_points_html(self, bullet_points):
+        """Generate HTML for bullet points list"""
+        if not bullet_points:
+            return ''
+        
+        # Ensure bullet_points is a list
+        if not isinstance(bullet_points, list):
+            return ''
+        
+        if len(bullet_points) == 0:
+            return ''
+        
+        # Create bullet points with proper email-compatible styling using two-column table
+        bullet_html = '<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;width:100%;margin:15px auto;max-width:500px">'
+        for bullet in bullet_points:
+            if bullet:  # Only add non-empty bullets
+                bullet_html += f'''
+            <tr>
+                <td style="padding:8px 0;padding-left:30px;width:20px;vertical-align:top">
+                    <span style="color:#00CED1;font-weight:bold;font-size:18px;line-height:24px">•</span>
+                </td>
+                <td style="padding:8px 0;vertical-align:top">
+                    <p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:24px;letter-spacing:0;color:#333333;font-size:16px;text-align:left">
+                        {bullet}
+                    </p>
+                </td>
+            </tr>'''
+        bullet_html += '</table>'
+        return bullet_html
 
 # Initialize the generator
 generator = TemplateGenerator()
