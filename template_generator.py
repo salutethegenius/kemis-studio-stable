@@ -401,8 +401,13 @@ class TemplateGenerator:
             if send_option == 'send_now':
                 send_campaign_value = '1'
             elif send_option == 'schedule' and scheduled_datetime:
-                # Convert Unix timestamp to datetime object
-                schedule_dt = datetime.fromtimestamp(int(scheduled_datetime))
+                # Convert Unix timestamp to datetime object (assume UTC)
+                # Then convert to EST/EDT (UTC-5 or UTC-4) for The Bahamas
+                schedule_dt_utc = datetime.utcfromtimestamp(int(scheduled_datetime))
+                # Convert UTC to EST (UTC-5) - The Bahamas timezone
+                # Note: This is a simple offset. For DST handling, you'd need pytz or zoneinfo
+                from datetime import timedelta
+                schedule_dt = schedule_dt_utc - timedelta(hours=5)  # EST offset
                 
                 # Round minutes to nearest 5-minute increment (Sendy requirement)
                 minutes = schedule_dt.minute
@@ -765,17 +770,7 @@ class TemplateGenerator:
 												<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;background-color:#f8f8f8;border-radius:8px;width:100%" width="100%">
 													<tbody>
 														<tr>
-															<td align="center" class="k" style="padding:0;Margin:0;padding-top:25px;padding-right:25px;padding-left:25px">
-															<h3 class="bh e d" style="Margin:0;font-family:arial, 'helvetica neue', helvetica, sans-serif;mso-line-height-rule:exactly;letter-spacing:0;font-size:18px;font-style:normal;font-weight:bold;line-height:21.6px;color:#333333">🎯 Ready to Take Action?</h3>
-															</td>
-														</tr>
-														<tr>
-															<td align="center" class="f br bs" style="Margin:0;padding-right:25px;padding-left:25px;padding-bottom:15px;padding-top:8px">
-															<p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:24px;letter-spacing:0;color:#333333;font-size:16px;text-align:center">{content.get('offer_details', "Don't miss out on this incredible opportunity!")}</p>
-															</td>
-														</tr>
-														<tr>
-															<td align="center" style="Margin:0;padding-bottom:25px;padding-left:25px;padding-right:25px">
+															<td align="center" style="Margin:0;padding:25px">
 															<a href="{content['cta_url']}" target="_blank" style="display:inline-block;background-color:#000000;color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:6px;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:16px;font-weight:bold;line-height:1.2;text-align:center;margin:0;">{content['cta_text']}</a>
 															</td>
 														</tr>
