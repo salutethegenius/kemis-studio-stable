@@ -11,6 +11,15 @@ import io
 import uuid
 from dotenv import load_dotenv
 
+# Try to import boto3 for S3 uploads (optional)
+try:
+    import boto3
+    from botocore.exceptions import ClientError, BotoCoreError
+    BOTO3_AVAILABLE = True
+except ImportError:
+    BOTO3_AVAILABLE = False
+    print("⚠️ boto3 not available - S3 uploads will be disabled. Install with: pip install boto3")
+
 # Load environment variables
 load_dotenv()
 
@@ -20,6 +29,21 @@ app = Flask(__name__)
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', 'your-openai-key-here')
 DALLE_API_KEY = os.getenv('DALLE_API_KEY', 'your-dalle-key-here')
 SENDY_API_KEY = os.getenv('SENDY_API_KEY', '')
+
+# AWS S3 Configuration
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', '')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', '')
+AWS_S3_BUCKET = os.getenv('AWS_S3_BUCKET', '')
+AWS_S3_REGION = os.getenv('AWS_S3_REGION', 'us-east-1')
+AWS_S3_BASE_URL = os.getenv('AWS_S3_BASE_URL', '')
+
+# Check if S3 is configured
+S3_CONFIGURED = (
+    BOTO3_AVAILABLE and
+    AWS_ACCESS_KEY_ID and
+    AWS_SECRET_ACCESS_KEY and
+    AWS_S3_BUCKET
+)
 
 # Template structure
 KEMISEMIL_TEMPLATE = {
@@ -1081,9 +1105,53 @@ def get_sendy_lists():
             'error': f'Error fetching lists: {str(e)}'
         }), 500
 
+def upload_image_to_s3(image_bytes, filename, content_type='image/jpeg'):
+    """Upload image to AWS S3 bucket"""
+    if not S3_CONFIGURED:
+        return None
+    
+    try:
+        s3_client = boto3.client(
+            's3',
+            aws_access_key_id=AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+            region_name=AWS_S3_REGION
+        )
+        
+        # Upload to S3
+        s3_key = f"images/{filename}"
+        s3_client.put_object(
+            Bucket=AWS_S3_BUCKET,
+            Key=s3_key,
+            Body=image_bytes,
+            ContentType=content_type,
+            ACL='public-read'  # Make images publicly accessible
+        )
+        
+        # Generate public URL
+        if AWS_S3_BASE_URL:
+            public_url = f"{AWS_S3_BASE_URL.rstrip('/')}/{s3_key}"
+        else:
+            # Fallback to standard S3 URL format
+            public_url = f"https://{AWS_S3_BUCKET}.s3.{AWS_S3_REGION}.amazonaws.com/{s3_key}"
+        
+        print(f"✅ Uploaded image to S3: {s3_key}")
+        print(f"🔗 S3 Public URL: {public_url}")
+        return public_url
+        
+    except ClientError as e:
+        print(f"❌ AWS S3 ClientError uploading image: {e}")
+        return None
+    except BotoCoreError as e:
+        print(f"❌ AWS BotoCoreError uploading image: {e}")
+        return None
+    except Exception as e:
+        print(f"❌ Error uploading image to S3: {e}")
+        return None
+
 @app.route('/images/<filename>')
 def serve_image(filename):
-    """Serve images from the images folder"""
+    """Serve images from the images folder (fallback for local storage)"""
     try:
         from flask import send_from_directory
         import os
@@ -1174,25 +1242,40 @@ def generate_template():
                     image_data_clean = img_data.split(',')[1]
                     image_bytes = base64.b64decode(image_data_clean)
                     
-                    # Save to images folder
+                    # Generate filename
                     suffix = f"_{idx+1}" if image_data2 else ""
                     image_filename_only = f"{campaign_name}_{timestamp}{suffix}.{image_format}"
-                    image_filepath = f"images/{image_filename_only}"
+                    content_type = f"image/{image_format}"
                     
-                    with open(image_filepath, 'wb') as f:
-                        f.write(image_bytes)
+                    # Try to upload to S3 first (if configured)
+                    public_url = None
+                    if S3_CONFIGURED:
+                        public_url = upload_image_to_s3(image_bytes, image_filename_only, content_type)
                     
-                    # Generate public URL (use environment variable or relative path)
-                    base_url = os.getenv('BASE_URL', '')
-                    if base_url:
-                        public_url = f"{base_url.rstrip('/')}/images/{image_filename_only}"
+                    # Fallback to local storage if S3 upload failed or not configured
+                    if not public_url:
+                        image_filepath = f"images/{image_filename_only}"
+                        os.makedirs('images', exist_ok=True)
+                        
+                        with open(image_filepath, 'wb') as f:
+                            f.write(image_bytes)
+                        
+                        # Generate public URL (use environment variable or relative path)
+                        base_url = os.getenv('BASE_URL', '')
+                        if base_url:
+                            public_url = f"{base_url.rstrip('/')}/images/{image_filename_only}"
+                        else:
+                            # Use relative path for local development
+                            public_url = f"/images/{image_filename_only}"
+                        
+                        print(f"💾 Saved image {idx+1} locally: {image_filepath}")
+                    
+                    if public_url:
+                        image_urls.append(public_url)
+                        print(f"🔗 Public URL: {public_url}")
                     else:
-                        # Use relative path for local development
-                        public_url = f"/images/{image_filename_only}"
-                    image_urls.append(public_url)
-                    
-                    print(f"💾 Saved image {idx+1}: {image_filepath}")
-                    print(f"🔗 Public URL: {public_url}")
+                        print(f"⚠️ Could not save or upload image {idx+1}")
+                        
                 except Exception as e:
                     print(f"⚠️ Could not save image {idx+1}: {e}")
         
@@ -1614,4 +1697,14 @@ def send_to_sendy():
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
     debug = os.getenv('FLASK_ENV', 'production') != 'production'
+    
+    # Print S3 configuration status
+    if S3_CONFIGURED:
+        print("✅ AWS S3 configured - images will be uploaded to S3")
+        print(f"   Bucket: {AWS_S3_BUCKET}, Region: {AWS_S3_REGION}")
+    else:
+        print("⚠️ AWS S3 not configured - images will be saved locally")
+        print("   Note: On Railway, local files are ephemeral and will be lost on restart")
+        print("   To enable S3 uploads, set: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_S3_BUCKET")
+    
     app.run(debug=debug, host='0.0.0.0', port=port) 
