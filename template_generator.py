@@ -965,6 +965,14 @@ def test_lists():
 def get_sendy_lists():
     """Fetch available lists from Sendy API"""
     try:
+        # Check if API key is set
+        if not SENDY_API_KEY:
+            print("❌ SENDY_API_KEY is not set")
+            return jsonify({
+                'success': False,
+                'error': 'SENDY_API_KEY environment variable is not set'
+            }), 500
+        
         sendy_url = "https://kemis.net/sendy/api/lists/get-lists.php"
         
         data = {
@@ -974,7 +982,7 @@ def get_sendy_lists():
         }
         
         print(f"📋 Fetching lists from Sendy API: {sendy_url}")
-        print(f"📋 Request data: {data}")
+        print(f"📋 Request data: api_key={SENDY_API_KEY[:8]}..., brand_id={data['brand_id']}")
         
         # Add headers to match the working campaign creation config
         headers = {
@@ -985,7 +993,7 @@ def get_sendy_lists():
         
         response = requests.post(sendy_url, data=data, headers=headers, timeout=10)
         print(f"📋 Sendy lists API response status: {response.status_code}")
-        print(f"📋 Response text: {response.text[:200]}")
+        print(f"📋 Response text: {response.text[:500]}")
         
         if response.status_code == 200:
             # Sendy returns lists as an object with keys like list1, list2, etc.
@@ -993,40 +1001,54 @@ def get_sendy_lists():
                 lists_obj = response.json()
                 print(f"📋 Parsed JSON response, found {len(lists_obj)} list keys")
                 
-                # Only show these specific lists
-                allowed_list_ids = [
-                    'fO6BdhtVFBdzyQBMcG6Yiw',  # 🔥 Engaged Core – Bahamas (Openers)
-                    'zjr2Pf3Pg892uheH0tbyqbOg'  # Clients
-                ]
-                
-                # Convert the object format to an array and filter
+                # Convert the object format to an array
                 lists_array = []
                 for key, value in lists_obj.items():
                     if isinstance(value, dict) and 'id' in value and 'name' in value:
-                        if value['id'] in allowed_list_ids:
-                            lists_array.append({
-                                'id': value['id'],
-                                'name': value['name']
-                            })
+                        lists_array.append({
+                            'id': value['id'],
+                            'name': value['name']
+                        })
                 
-                print(f"📋 Successfully converted to array: {len(lists_array)} lists (filtered)")
-                return jsonify({
-                    'success': True,
-                    'lists': lists_array
-                })
-            except Exception as e:
-                print(f"❌ Error parsing Sendy lists response: {e}")
+                # If we have lists, return them all (removed filtering)
+                if lists_array:
+                    print(f"📋 Successfully converted to array: {len(lists_array)} lists")
+                    return jsonify({
+                        'success': True,
+                        'lists': lists_array
+                    })
+                else:
+                    # No lists found in response
+                    print(f"⚠️ No lists found in response object")
+                    return jsonify({
+                        'success': False,
+                        'error': 'No lists found in Sendy response',
+                        'raw_response': response.text[:500]
+                    })
+            except json.JSONDecodeError as e:
+                print(f"❌ Error parsing Sendy lists response as JSON: {e}")
                 print(f"📋 Raw response text: {response.text[:500]}")
                 # If not JSON, try parsing as plain text (some Sendy versions return different formats)
                 return jsonify({
                     'success': False,
                     'error': f'Failed to parse lists response: {str(e)}',
-                    'raw_response': response.text
+                    'raw_response': response.text[:500]
+                })
+            except Exception as e:
+                print(f"❌ Unexpected error parsing response: {e}")
+                print(f"📋 Raw response text: {response.text[:500]}")
+                return jsonify({
+                    'success': False,
+                    'error': f'Error processing lists: {str(e)}',
+                    'raw_response': response.text[:500]
                 })
         else:
+            error_msg = f'Sendy API returned status {response.status_code}'
+            print(f"❌ {error_msg}")
             return jsonify({
                 'success': False,
-                'error': f'Sendy API returned status {response.status_code}'
+                'error': error_msg,
+                'raw_response': response.text[:500] if response.text else 'No response body'
             }), response.status_code
             
     except requests.exceptions.Timeout:
