@@ -555,7 +555,7 @@ class TemplateGenerator:
             images = [images]
         
         # Determine hero title color based on content
-        hero_color = "#00CED1"  # Default turquoise
+        hero_color = "#000000"  # Default black
         if "sale" in content['hero_title'].lower() or "deal" in content['hero_title'].lower():
             hero_color = "#FF6B35"  # Orange for sales/deals
         elif "flash" in content['hero_title'].lower():
@@ -647,32 +647,21 @@ class TemplateGenerator:
 																		<td align="left" style="padding:0;Margin:0;width:30px;vertical-align:middle">
 																		<!-- Email Icon -->
 																		<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;">
-																			<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="#00CED1" stroke-width="2" fill="none"/>
-																			<polyline points="4,6 12,13 20,6" stroke="#00CED1" stroke-width="2" fill="none"/>
+																			<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="#000000" stroke-width="2" fill="none"/>
+																			<polyline points="4,6 12,13 20,6" stroke="#000000" stroke-width="2" fill="none"/>
 																		</svg>
 																		</td>
 																		<td align="left" style="padding:0;Margin:0;padding-left:5px;vertical-align:middle">
-																		<a href="https://start.kemis.net" style="text-decoration:none;color:#00CED1;">
-																		<h2 style="Margin:0;font-family:arial, 'helvetica neue', helvetica, sans-serif;mso-line-height-rule:exactly;letter-spacing:0;font-size:18px;font-style:normal;font-weight:bold;line-height:22px;color:#00CED1">KemisEmail</h2>
+																		<a href="https://start.kemis.net" style="text-decoration:none;color:#000000;">
+																		<h2 style="Margin:0;font-family:arial, 'helvetica neue', helvetica, sans-serif;mso-line-height-rule:exactly;letter-spacing:0;font-size:18px;font-style:normal;font-weight:bold;line-height:22px;color:#000000">KemisEmail</h2>
 																		</a>
 																		</td>
 																	</tr>
 																</tbody>
 															</table>
 															</td>
-															<td align="center" class="header-menu" style="padding:0;Margin:0;width:200px;vertical-align:middle">
-															<table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px" width="100%">
-																<tbody>
-																	<tr>
-																		<td align="center" style="padding:0;Margin:0">
-																		<a href="https://start.kemis.net/services" style="text-decoration:none;color:#666666;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:normal;">Advertising Rates</a>
-																		</td>
-																	</tr>
-																</tbody>
-															</table>
-															</td>
 															<td align="right" class="header-cta" style="padding:0;Margin:0;width:160px;vertical-align:middle">
-															<a href="https://dzvs3n3sqle.typeform.com/to/JxCYlnLb" style="display:inline-block;background-color:#000000;color:#ffffff;text-decoration:none;padding:8px 16px;border-radius:4px;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:bold;line-height:1.2;text-align:center;margin:0;">Join Our List</a>
+															<a href="https://start.kemis.net/services" style="display:inline-block;background-color:#000000;color:#ffffff;text-decoration:none;padding:8px 16px;border-radius:4px;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:bold;line-height:1.2;text-align:center;margin:0;">Advertise With Us</a>
 															</td>
 														</tr>
 													</tbody>
@@ -760,7 +749,7 @@ class TemplateGenerator:
 														</tr>
 														<tr>
 															<td align="center" style="Margin:0;padding-bottom:20px;padding-left:20px;padding-right:20px">
-															<a href="{content['cta_url']}" target="_blank" style="display:inline-block;background-color:#00CED1;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:6px;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:16px;font-weight:bold;line-height:1.2;text-align:center;margin:0;">{content['cta_text']}</a>
+															<a href="{content['cta_url']}" target="_blank" style="display:inline-block;background-color:#000000;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:6px;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:16px;font-weight:bold;line-height:1.2;text-align:center;margin:0;">{content['cta_text']}</a>
 															</td>
 														</tr>
 													</tbody>
@@ -822,7 +811,7 @@ class TemplateGenerator:
 																<tbody>
 																	<tr>
 																		<td align="center" style="padding:0;Margin:0;padding-right:15px">
-																		<a href="https://dzvs3n3sqle.typeform.com/to/JxCYlnLb" style="text-decoration:none;color:#00CED1;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:normal;">Sign Up</a>
+																		<a href="https://dzvs3n3sqle.typeform.com/to/JxCYlnLb" style="text-decoration:none;color:#000000;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:normal;">Sign Up</a>
 																		</td>
 																		<td align="center" style="padding:0;Margin:0;padding-right:15px">
 																		<a href="https://kemisdigital.com/policies/refund-policy" style="text-decoration:none;color:#666666;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:normal;">Privacy Policy</a>
@@ -913,9 +902,9 @@ class TemplateGenerator:
         if not images or len(images) == 0:
             # No images - show placeholder
             if cta_url:
-                return f'<a href="{cta_url}" target="_blank" style="text-decoration: none;"><div style="display: block; font-size: 14px; border: 0px; outline: none; text-decoration: none; border-radius: 15px; width: 560px; height: 400px; background: linear-gradient(135deg, #00CED1 0%, #FFD700 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold;">{alt_text}</div></a>'
+                return f'<a href="{cta_url}" target="_blank" style="text-decoration: none;"><div style="display: block; font-size: 14px; border: 0px; outline: none; text-decoration: none; border-radius: 15px; width: 560px; height: 400px; background: #000000; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold;">{alt_text}</div></a>'
             else:
-                return f'<div style="display: block; font-size: 14px; border: 0px; outline: none; text-decoration: none; border-radius: 15px; width: 560px; height: 400px; background: linear-gradient(135deg, #00CED1 0%, #FFD700 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold;">{alt_text}</div>'
+                return f'<div style="display: block; font-size: 14px; border: 0px; outline: none; text-decoration: none; border-radius: 15px; width: 560px; height: 400px; background: #000000; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold;">{alt_text}</div>'
         
         html_parts = []
         for idx, image_src in enumerate(images):
