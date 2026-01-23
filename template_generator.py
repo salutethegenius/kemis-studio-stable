@@ -1010,12 +1010,26 @@ def get_sendy_lists():
                             'name': value['name']
                         })
                 
-                # If we have lists, return them all (removed filtering)
-                if lists_array:
-                    print(f"📋 Successfully converted to array: {len(lists_array)} lists")
+                # Filter to only show the allowed lists
+                allowed_list_names = [
+                    '🔥 Engaged Core – Bahamas (Openers)',
+                    'Drewber Team',
+                    'LawBey Users',
+                    'Bahamas Attorneys',
+                    'Clients'
+                ]
+                
+                filtered_lists = [
+                    lst for lst in lists_array 
+                    if lst['name'] in allowed_list_names
+                ]
+                
+                # If we have filtered lists, return them
+                if filtered_lists:
+                    print(f"📋 Successfully filtered to {len(filtered_lists)} allowed lists")
                     return jsonify({
                         'success': True,
-                        'lists': lists_array
+                        'lists': filtered_lists
                     })
                 else:
                     # No lists found in response
