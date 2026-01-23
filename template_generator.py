@@ -1124,8 +1124,8 @@ def upload_image_to_s3(image_bytes, filename, content_type='image/jpeg'):
             Bucket=AWS_S3_BUCKET,
             Key=s3_key,
             Body=image_bytes,
-            ContentType=content_type,
-            ACL='public-read'  # Make images publicly accessible
+            ContentType=content_type
+            # Note: ACL is not used - public access is handled by bucket policy
         )
         
         # Generate public URL
