@@ -579,7 +579,7 @@ class TemplateGenerator:
 	<style type="text/css">.rollover:hover .rollover-first {{ max-height:0px!important; display:none!important; }} .rollover:hover .rollover-second {{ max-height:none!important; display:block!important; }} .rollover span {{ font-size:0px; }} u + .body img ~ div div {{ display:none; }} #outlook a {{ padding:0; }} span.MsoHyperlink, span.MsoHyperlinkFollowed {{ color:inherit; mso-style-priority:99; }} a.ba {{ mso-style-priority:100!important; text-decoration:none!important; }} a[x-apple-data-detectors], #MessageViewBody a {{ color:inherit!important; text-decoration:none!important; font-size:inherit!important; font-family:inherit!important; font-weight:inherit!important; line-height:inherit!important; }} .q {{ display:none; float:left; overflow:hidden; width:0; max-height:0; line-height:0; mso-hide:all; }} @media only screen and (max-width:600px) {{.bw {{ padding-top:10px!important }} .bv {{ padding-bottom:10px!important }}
  .bu {{ padding-right:20px!important }} .bt {{ padding-left:20px!important }} .bs {{ padding-right:5px!important }} .br {{ padding-left:5px!important }} .bq {{ padding-left:0px!important }} .bp {{ padding-right:24px!important }} *[class="gmail-fix"] {{ display:none!important }} p, a {{ line-height:150%!important }} h1, h1 a {{ line-height:110%!important }} h2, h2 a {{ line-height:110%!important }} h3, h3 a {{ line-height:110%!important }} h4, h4 a {{ line-height:110%!important }} h5, h5 a {{ line-height:110%!important }} h6, h6 a {{ line-height:110%!important }} .bm p {{ }} .bl p {{ }} .bk p {{ }} h1 {{ font-size:36px!important; text-align:left }} h2 {{ font-size:26px!important; text-align:left }} h3 {{ font-size:20px!important; text-align:left }} h4 {{ font-size:24px!important; text-align:left }} h5 {{ font-size:20px!important; text-align:left }} h6 {{ font-size:16px!important; text-align:left }} .o td a {{ font-size:12px!important }} .bm p, .bm a {{ font-size:14px!important }}
  .bl p, .bl a {{ font-size:14px!important }} .bk p, .bk a {{ font-size:12px!important }} .bh, .bh h1, .bh h2, .bh h3, .bh h4, .bh h5, .bh h6 {{ text-align:center!important }} .bg .rollover:hover .rollover-second, .bh .rollover:hover .rollover-second, .bi .rollover:hover .rollover-second {{ display:inline!important }} a.ba, button.ba {{ font-size:20px!important; padding:10px 20px 10px 20px!important; line-height:120%!important }} a.ba, button.ba, .be {{ display:inline-block!important }} .z, .z .ba, .bb, .bb td, .o {{ display:inline-block!important }} .t table, .u table, .v table, .t, .v, .u {{ width:100%!important; max-width:600px!important }} .adapt-img {{ width:100%!important; height:auto!important }} .q {{ width:auto!important; overflow:visible!important; float:none!important; max-height:inherit!important; line-height:inherit!important }} tr.q {{ display:table-row!important }} .o td {{ width:1%!important }}
- table.n, .esd-block-html table {{ width:auto!important }} .h-auto {{ height:auto!important }} .l .m.e, .l .m.e * {{ font-size:13px!important; line-height:150%!important }} .k .d.e, .k .d.e * {{ font-size:16px!important; line-height:150%!important }} .j .i, .j .i * {{ font-size:48px!important; line-height:110%!important }} .h .i, .j .i * {{ font-size:48px!important; line-height:110%!important }} .f .g.e, .f .g.e * {{ font-size:22px!important; line-height:150%!important }} .c .d.e, .c .d.e * {{ font-size:16px!important; line-height:150%!important }} .a .b, .a .b * {{ font-size:14px!important; line-height:150%!important }} .header-logo, .header-menu, .header-cta {{ display:block!important; width:100%!important; text-align:center!important; padding:10px 0!important }} .header-menu td {{ display:block!important; padding:8px 0!important; text-align:center!important }} .footer-links td {{ display:block!important; text-align:center!important; padding:5px 0!important }} }} @media screen and (max-width:384px) {{.mail-message-content {{ width:414px!important }} }} @media (prefers-color-scheme: dark) {{ body, .es-wrapper {{ background-color:#1a1a1a!important }} .bm {{ background-color:#2d2d2d!important }} p, h1, h2, h3, h4, h5, h6, td, li {{ color:#ffffff!important }} a {{ color:#00CED1!important }} .footer-bg {{ background-color:#1a1a1a!important }} }}
+ table.n, .esd-block-html table {{ width:auto!important }} .h-auto {{ height:auto!important }} .l .m.e, .l .m.e * {{ font-size:13px!important; line-height:150%!important }} .k .d.e, .k .d.e * {{ font-size:16px!important; line-height:150%!important }} .j .i, .j .i * {{ font-size:48px!important; line-height:110%!important }} .h .i, .j .i * {{ font-size:48px!important; line-height:110%!important }} .f .g.e, .f .g.e * {{ font-size:22px!important; line-height:150%!important }} .c .d.e, .c .d.e * {{ font-size:16px!important; line-height:150%!important }} .a .b, .a .b * {{ font-size:14px!important; line-height:150%!important }} .header-logo, .header-menu, .header-cta {{ display:block!important; width:100%!important; text-align:center!important; padding:10px 0!important }} .header-menu td {{ display:block!important; padding:8px 0!important; text-align:center!important }} .footer-links td {{ display:block!important; text-align:center!important; padding:5px 0!important }} }} @media screen and (max-width:384px) {{.mail-message-content {{ width:414px!important }} }} @media (prefers-color-scheme: dark) {{ body, .es-wrapper {{ background-color:#1a1a1a!important }} .bm {{ background-color:#2d2d2d!important }} p, h1, h2, h3, h4, h5, h6, td, li {{ color:#ffffff!important }} a {{ color:#ffffff!important }} .footer-bg {{ background-color:#1a1a1a!important }} }}
 	</style>
 </head>
 <body class="body" style="width:100%;height:100%;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;padding:0;Margin:0">
@@ -672,7 +672,7 @@ class TemplateGenerator:
 															</table>
 															</td>
 															<td align="right" class="header-cta" style="padding:0;Margin:0;width:160px;vertical-align:middle">
-															<a href="https://dzvs3n3sqle.typeform.com/to/JxCYlnLb" style="display:inline-block;background-color:#00CED1;color:#ffffff;text-decoration:none;padding:8px 16px;border-radius:4px;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:bold;line-height:1.2;text-align:center;margin:0;">Join Our List</a>
+															<a href="https://dzvs3n3sqle.typeform.com/to/JxCYlnLb" style="display:inline-block;background-color:#000000;color:#ffffff;text-decoration:none;padding:8px 16px;border-radius:4px;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;font-weight:bold;line-height:1.2;text-align:center;margin:0;">Join Our List</a>
 															</td>
 														</tr>
 													</tbody>
@@ -797,7 +797,7 @@ class TemplateGenerator:
 													<tbody>
 														<tr>
 															<td align="center" class="bk" style="padding:0;Margin:0">
-															<h3 style="Margin:0;font-family:arial, 'helvetica neue', helvetica, sans-serif;mso-line-height-rule:exactly;letter-spacing:0;font-size:18px;font-style:normal;font-weight:bold;line-height:22px;color:#00CED1">
+															<h3 style="Margin:0;font-family:arial, 'helvetica neue', helvetica, sans-serif;mso-line-height-rule:exactly;letter-spacing:0;font-size:18px;font-style:normal;font-weight:bold;line-height:22px;color:#000000">
 																KemisEmail – Delivering Local Deals and Offers Since 2005
 															</h3>
 															</td>
@@ -963,7 +963,7 @@ class TemplateGenerator:
                 bullet_html += f'''
             <tr>
                 <td style="padding:8px 0;padding-left:30px;width:20px;vertical-align:top">
-                    <span style="color:#00CED1;font-weight:bold;font-size:18px;line-height:24px">•</span>
+                    <span style="color:#000000;font-weight:bold;font-size:18px;line-height:24px">•</span>
                 </td>
                 <td style="padding:8px 0;vertical-align:top">
                     <p class="d e" style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:24px;letter-spacing:0;color:#333333;font-size:16px;text-align:left">
@@ -1553,7 +1553,7 @@ def send_direct_test():
         </head>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
             <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #00CED1;">🧪 Test Email</h2>
+                <h2 style="color: #000000;">🧪 Test Email</h2>
                 <p>{test_body}</p>
                 <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
                 <p style="font-size: 12px; color: #666;">
