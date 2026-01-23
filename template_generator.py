@@ -379,9 +379,9 @@ class TemplateGenerator:
             plain_text_parts.append("")
             plain_text_parts.append("KemisEmail – Delivering Local Deals and Offers Since 2005")
             plain_text_parts.append("")
-            plain_text_parts.append("2025 © Kemis Group of Companies Inc. All rights reserved.")
+            plain_text_parts.append("2026 © KemisEmail a subsidery of Kemis Ltd. All rights reserved.")
             plain_text_parts.append("")
-            plain_text_parts.append("Nassau West, New Providence, The Bahamas")
+            plain_text_parts.append("From The Beautiful The Bahamas")
             plain_text_parts.append("")
             plain_text_parts.append("Sign Up https://dzvs3n3sqle.typeform.com/to/JxCYlnLb")
             plain_text_parts.append("Privacy Policy #")
@@ -794,14 +794,14 @@ class TemplateGenerator:
 														<tr>
 															<td align="center" class="bk" style="padding:0;Margin:0;padding-top:20px">
 															<p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;font-size:12px;font-style:normal;font-weight:normal;color:#666666">
-																2026 © Kemis Group of Companies Inc. All rights reserved.
+																2026 © KemisEmail a subsidery of Kemis Ltd. All rights reserved.
 															</p>
 															</td>
 														</tr>
 														<tr>
 															<td align="center" class="bk" style="padding:0;Margin:0;padding-top:10px">
 															<p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:18px;letter-spacing:0;font-size:12px;font-style:normal;font-weight:normal;color:#666666">
-																Nassau West, New Providence, The Bahamas
+																From The Beautiful The Bahamas
 															</p>
 															</td>
 														</tr>
