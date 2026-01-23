@@ -694,30 +694,7 @@
             
             <div class="action-buttons">
                 <button class="btn btn-primary" id="downloadBtn">📥 Download HTML</button>
-                <button class="btn btn-warning" id="testEmailBtn">📧 Send Test Email</button>
                 <button class="btn btn-success" id="sendyBtn">📤 Create Campaign in Sendy</button>
-            </div>
-            
-            <div id="testEmailSection" style="display: none; margin-top: 20px; padding: 20px; background: #1a1a1a; border-radius: 8px; border: 2px solid #ffc107;">
-                <h4 style="color: #ffc107; margin-bottom: 15px;">📧 Send Test Email</h4>
-                <div style="margin-bottom: 15px;">
-                    <label for="testEmailInput" style="display: block; margin-bottom: 8px; color: #ffffff;">
-                        Email Address(es):
-                    </label>
-                    <input 
-                        type="text" 
-                        id="testEmailInput" 
-                        placeholder="test@example.com, another@example.com"
-                        style="width: 100%; padding: 10px; border: 1px solid #404040; border-radius: 4px; font-size: 14px; background: #2c2c2c; color: #ffffff;"
-                    >
-                    <small style="color: #cccccc; display: block; margin-top: 5px;">
-                        Enter one or more email addresses (comma-separated)
-                    </small>
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-warning" id="sendTestBtn">✉️ Send Test</button>
-                    <button class="btn btn-secondary" id="cancelTestBtn">❌ Cancel</button>
-                </div>
             </div>
         </div>
     </div>
@@ -1195,66 +1172,6 @@
                 }
             });
             
-            // Test Email button - show/hide section
-            document.getElementById('testEmailBtn').addEventListener('click', function() {
-                const section = document.getElementById('testEmailSection');
-                section.style.display = section.style.display === 'none' ? 'block' : 'none';
-            });
-            
-            // Cancel test email
-            document.getElementById('cancelTestBtn').addEventListener('click', function() {
-                document.getElementById('testEmailSection').style.display = 'none';
-                document.getElementById('testEmailInput').value = '';
-            });
-            
-            // Send test email
-            document.getElementById('sendTestBtn').addEventListener('click', async function() {
-                if (!currentResult) {
-                    showError('No template available to send');
-                    return;
-                }
-                
-                const emails = document.getElementById('testEmailInput').value.trim();
-                if (!emails) {
-                    showError('Please enter at least one email address');
-                    return;
-                }
-                
-                // Show loading state
-                const btn = document.getElementById('sendTestBtn');
-                const originalText = btn.textContent;
-                btn.textContent = '✉️ Sending...';
-                btn.disabled = true;
-                
-                try {
-                    const response = await fetch('/send-test-email', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            emails: emails,
-                            content: currentResult.content,
-                            html_template: currentResult.html_template
-                        })
-                    });
-                    
-                    const result = await response.json();
-                    
-                    if (result.success) {
-                        showSuccess(`✅ Test email sent to: ${emails}`);
-                        document.getElementById('testEmailSection').style.display = 'none';
-                        document.getElementById('testEmailInput').value = '';
-                    } else {
-                        showError('Failed to send test email: ' + (result.error || 'Unknown error'));
-                    }
-                } catch (error) {
-                    showError('Network error: ' + error.message);
-                } finally {
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                }
-            });
             
             // Sendy functionality
             document.getElementById('sendyBtn').addEventListener('click', async function() {
