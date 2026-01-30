@@ -325,15 +325,14 @@ class TemplateGenerator:
                 'list': 'DU0p7BsJdnwE0MXNZusbMQ'
             }
             
-            # Use browser-like headers
+            # Use browser-like headers with Chrome/144 and no compression
             browser_headers = {
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                 'Accept-Language': 'en-US,en;q=0.9',
+                'Accept-Encoding': 'identity',
                 'Referer': 'https://kemis.net/sendy/',
-                'Origin': 'https://kemis.net',
-                'DNT': '1',
-                'Connection': 'keep-alive'
+                'Origin': 'https://kemis.net'
             }
             
             try:
@@ -470,12 +469,10 @@ class TemplateGenerator:
                 # Standard form data with browser-like headers
                 {'data': campaign_data, 'headers': {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
                     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                     'Accept-Language': 'en-US,en;q=0.9',
-                    'Referer': 'https://kemis.net/sendy/',
-                    'Origin': 'https://kemis.net',
-                    'DNT': '1'
+                    'Accept-Encoding': 'identity'
                 }},
                 # Without content-type header (let requests set it) but with browser headers
                 {'data': campaign_data, 'headers': browser_headers},
@@ -1034,17 +1031,6 @@ def get_sendy_lists():
                 'error': 'SENDY_API_KEY environment variable is not set'
             }), 500
         
-        # Use a session to maintain cookies and bypass CAPTCHA
-        session = requests.Session()
-        
-        # First, visit the main Sendy page to get cookies and establish session
-        print("🍪 Establishing session with Sendy...")
-        try:
-            init_response = session.get("https://kemis.net/sendy/", timeout=10)
-            print(f"🍪 Session established: {init_response.status_code}")
-        except Exception as e:
-            print(f"⚠️ Could not establish session: {e}")
-        
         sendy_url = "https://kemis.net/sendy/api/lists/get-lists.php"
         
         data = {
@@ -1056,26 +1042,20 @@ def get_sendy_lists():
         print(f"📋 Fetching lists from Sendy API: {sendy_url}")
         print(f"📋 Request data: api_key={SENDY_API_KEY[:8]}..., brand_id={data['brand_id']}")
         
-        # Add more browser-like headers to avoid CAPTCHA
+        # Use browser-like headers with Chrome/144 user agent
+        # Set Accept-Encoding to 'identity' to prevent server compression
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
+            'Accept': 'application/json, text/plain, */*',
             'Accept-Language': 'en-US,en;q=0.9',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Referer': 'https://kemis.net/sendy/',
-            'Origin': 'https://kemis.net',
-            'DNT': '1',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'same-origin',
-            'Sec-Fetch-User': '?1',
-            'Cache-Control': 'max-age=0'
+            'Accept-Encoding': 'identity'
         }
         
-        response = session.post(sendy_url, data=data, headers=headers, timeout=10)
+        response = requests.post(sendy_url, data=data, headers=headers, timeout=10)
+        
+        # Log response headers for debugging
+        print(f"📋 Response headers: {dict(response.headers)}")
         print(f"📋 Sendy lists API response status: {response.status_code}")
         print(f"📋 Response text: {response.text[:500]}")
         
@@ -1502,15 +1482,13 @@ This is a test email from KemisEmail Template Creator.
         except Exception as e:
             print(f"⚠️ Session setup warning: {e}")
         
-        # Add browser-like headers to avoid CAPTCHA
+        # Add browser-like headers with Chrome/144 and no compression
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language': 'en-US,en;q=0.9',
-            'Referer': 'https://kemis.net/sendy/',
-            'Origin': 'https://kemis.net',
-            'DNT': '1'
+            'Accept-Encoding': 'identity'
         }
         
         print(f"📧 Creating test campaign for: {emails}")
@@ -1678,15 +1656,13 @@ Sent at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
         except Exception as e:
             print(f"⚠️ Session setup warning: {e}")
         
-        # Add browser-like headers to avoid CAPTCHA
+        # Add browser-like headers with Chrome/144 and no compression
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language': 'en-US,en;q=0.9',
-            'Referer': 'https://kemis.net/sendy/',
-            'Origin': 'https://kemis.net',
-            'DNT': '1'
+            'Accept-Encoding': 'identity'
         }
         
         sendy_url = "https://kemis.net/sendy/api/campaigns/create.php"
