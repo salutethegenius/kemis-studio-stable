@@ -3,6 +3,7 @@ import json
 import re
 import requests
 from datetime import datetime
+import time
 import openai
 from flask import Flask, render_template, request, jsonify, send_file
 import base64
@@ -44,6 +45,27 @@ S3_CONFIGURED = (
     AWS_SECRET_ACCESS_KEY and
     AWS_S3_BUCKET
 )
+
+# #region agent log - debug helper
+def _agent_debug_log(run_id, hypothesis_id, location, message, data=None):
+    """Lightweight NDJSON logger for debug-mode instrumentation."""
+    try:
+        log_path = "/Users/ghost/Desktop/ORG/studio/kemis-studio-stable/.cursor/debug.log"
+        payload = {
+            "id": f"log_{int(time.time() * 1000)}",
+            "timestamp": int(time.time() * 1000),
+            "runId": run_id,
+            "hypothesisId": hypothesis_id,
+            "location": location,
+            "message": message,
+            "data": data or {},
+        }
+        with open(log_path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(payload) + "\n")
+    except Exception:
+        # Never let logging break app behavior
+        pass
+# #endregion
 
 # Template structure
 KEMISEMIL_TEMPLATE = {
@@ -1021,113 +1043,110 @@ def test_lists():
 
 @app.route('/get-sendy-lists', methods=['GET'])
 def get_sendy_lists():
-    """Fetch available lists from Sendy API"""
+    """Fetch available lists via Kemis proxy (Sendy API)"""
     try:
         # Check if API key is set
-        if not SENDY_API_KEY:
-            print("❌ SENDY_API_KEY is not set")
-            return jsonify({
-                'success': False,
-                'error': 'SENDY_API_KEY environment variable is not set'
-            }), 500
+        # NOTE: lists are now fetched via the kemis.net proxy which
+        # owns the Sendy API key server-side, so the Python app no
+        # longer needs direct Sendy credentials.
         
-        sendy_url = "https://kemis.net/sendy/api/lists/get-lists.php"
+        # #region agent log - entry
+        _agent_debug_log(
+            run_id="sendy_lists_weekly_issue",
+            hypothesis_id="H1",
+            location="template_generator.py:get_sendy_lists:entry",
+            message="Entering get_sendy_lists",
+            data={
+                "api_key_present": bool(SENDY_API_KEY),
+                "brand_id": "1",
+            },
+        )
+        # #endregion
         
-        data = {
-            'api_key': SENDY_API_KEY,
-            'brand_id': '1',  # Your brand ID
-            'include_hidden': 'no'  # Optional: set to 'yes' to include hidden lists
-        }
+        proxy_url = "https://www.kemis.net/sendy/proxy/get-lists.php"
         
-        print(f"📋 Fetching lists from Sendy API: {sendy_url}")
-        print(f"📋 Request data: api_key={SENDY_API_KEY[:8]}..., brand_id={data['brand_id']}")
+        print(f"📋 Fetching lists from Kemis proxy: {proxy_url}")
         
-        # Use browser-like headers with Chrome/144 user agent
-        # Set Accept-Encoding to 'identity' to prevent server compression
-        headers = {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
-            'Accept': 'application/json, text/plain, */*',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Accept-Encoding': 'identity'
-        }
+        # #region agent log - before request
+        _agent_debug_log(
+            run_id="sendy_lists_weekly_issue",
+            hypothesis_id="H2",
+            location="template_generator.py:get_sendy_lists:before_request",
+            message="About to call Kemis proxy for lists",
+            data={
+                "url": proxy_url,
+            },
+        )
+        # #endregion
         
-        response = requests.post(sendy_url, data=data, headers=headers, timeout=10)
+        # Call the Kemis proxy which wraps the Sendy lists API.
+        # No body is required; proxy owns the API key and config.
+        response = requests.post(proxy_url, timeout=10)
         
         # Log response headers for debugging
         print(f"📋 Response headers: {dict(response.headers)}")
-        print(f"📋 Sendy lists API response status: {response.status_code}")
+        print(f"📋 Kemis proxy response status: {response.status_code}")
         print(f"📋 Response text: {response.text[:500]}")
+
+        # #region agent log - after response
+        _agent_debug_log(
+            run_id="sendy_lists_weekly_issue",
+            hypothesis_id="H3",
+            location="template_generator.py:get_sendy_lists:after_response",
+            message="Received Kemis proxy response",
+            data={
+                "status_code": response.status_code,
+                "content_snippet": response.text[:120],
+            },
+        )
+        # #endregion
         
-        if response.status_code == 200:
-            # Sendy returns lists as an object with keys like list1, list2, etc.
-            try:
-                lists_obj = response.json()
-                print(f"📋 Parsed JSON response, found {len(lists_obj)} list keys")
-                
-                # Convert the object format to an array
-                lists_array = []
-                for key, value in lists_obj.items():
-                    if isinstance(value, dict) and 'id' in value and 'name' in value:
-                        lists_array.append({
-                            'id': value['id'],
-                            'name': value['name']
-                        })
-                
-                # Filter to only show the allowed lists
-                allowed_list_names = [
-                    '🔥 Engaged Core – Bahamas (Openers)',
-                    'Drewber Team',
-                    'LawBey Users',
-                    'Bahamas Attorneys',
-                    'Clients'
-                ]
-                
-                filtered_lists = [
-                    lst for lst in lists_array 
-                    if lst['name'] in allowed_list_names
-                ]
-                
-                # If we have filtered lists, return them
-                if filtered_lists:
-                    print(f"📋 Successfully filtered to {len(filtered_lists)} allowed lists")
-                    return jsonify({
-                        'success': True,
-                        'lists': filtered_lists
-                    })
-                else:
-                    # No lists found in response
-                    print(f"⚠️ No lists found in response object")
-                    return jsonify({
-                        'success': False,
-                        'error': 'No lists found in Sendy response',
-                        'raw_response': response.text[:500]
-                    })
-            except json.JSONDecodeError as e:
-                print(f"❌ Error parsing Sendy lists response as JSON: {e}")
-                print(f"📋 Raw response text: {response.text[:500]}")
-                # If not JSON, try parsing as plain text (some Sendy versions return different formats)
-                return jsonify({
-                    'success': False,
-                    'error': f'Failed to parse lists response: {str(e)}',
-                    'raw_response': response.text[:500]
-                })
-            except Exception as e:
-                print(f"❌ Unexpected error parsing response: {e}")
-                print(f"📋 Raw response text: {response.text[:500]}")
-                return jsonify({
-                    'success': False,
-                    'error': f'Error processing lists: {str(e)}',
-                    'raw_response': response.text[:500]
-                })
-        else:
-            error_msg = f'Sendy API returned status {response.status_code}'
+        if response.status_code != 200:
+            error_msg = f'Kemis proxy returned status {response.status_code}'
             print(f"❌ {error_msg}")
+            # #region agent log - non-200 branch
+            _agent_debug_log(
+                run_id="sendy_lists_weekly_issue",
+                hypothesis_id="H4",
+                location="template_generator.py:get_sendy_lists:non_200",
+                message="Non-200 status from Kemis proxy",
+                data={
+                    "status_code": response.status_code,
+                    "headers": dict(response.headers),
+                    "content_snippet": response.text[:200],
+                },
+            )
+            # #endregion
             return jsonify({
                 'success': False,
                 'error': error_msg,
                 'raw_response': response.text[:500] if response.text else 'No response body'
             }), response.status_code
+
+        # At this point we have HTTP 200 from the proxy – parse its JSON.
+        try:
+            proxy_data = response.json()
+        except json.JSONDecodeError as e:
+            print(f"❌ Error parsing Kemis proxy response as JSON: {e}")
+            print(f"📋 Raw response text: {response.text[:500]}")
+            return jsonify({
+                'success': False,
+                'error': f'Failed to parse proxy response: {str(e)}',
+                'raw_response': response.text[:500]
+            }), 502
+
+        # Proxy itself reports success/failure in JSON.
+        if not proxy_data.get('success'):
+            print(f"⚠️ Kemis proxy reported failure: {proxy_data.get('error')}")
+            return jsonify(proxy_data), 502
+
+        # Happy path: just pass through the lists array.
+        lists_array = proxy_data.get('lists', [])
+        print(f"📋 Kemis proxy returned {len(lists_array)} lists")
+        return jsonify({
+            'success': True,
+            'lists': lists_array
+        })
             
     except requests.exceptions.Timeout:
         return jsonify({
